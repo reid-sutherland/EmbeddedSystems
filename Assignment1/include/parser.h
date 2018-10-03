@@ -23,6 +23,6 @@ typedef struct parse_result{
 #define MAX_VAR_LEN 15+1
 
 // parse_string function
-PARSE_RESULT_t *parse_string(const char* input_buffer);
+PARSE_RESULT_t* parse_string(const char* input_buffer);
 
 #endif // PARSER_H

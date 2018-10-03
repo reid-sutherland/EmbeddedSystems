@@ -9,7 +9,7 @@ void testParser();
 
 
 // global pointer to main dictionary
-DICT_t * MASTER_DICT;
+DICT_t * DICT_MAIN;
 
 
 int main() {
@@ -48,10 +48,22 @@ int main() {
 				break;
 
 			case ASSIGN_OP:
+				// ensure there is something to assign
 				if (result->right_operand1 != NULL) {
 					printf("Error: Nothing to assign\n");
 					printf("---- Right operand1 null\n");
+					printf("main result->optype switch\n");
+					break;
 				}
+
+				// parse the parse result
+				const char* varname = result->left_operand;
+				ELEMENT_t element;
+
+				// assignment successful
+				if (writeVariable(DICT_MAIN, result->left_operand, , ))
+
+
 				break;
 
 			case ADD_OP:

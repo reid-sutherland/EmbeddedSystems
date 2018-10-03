@@ -6,7 +6,7 @@ Input -- Input buffer from string to be parsed
 Output -- PARSE_RESULT_t pointer holding strings of operands, and an operation type
 PARSE_RESULT_t will have pointers to strings representing operands that will need to be freed
 */
-PARSE_RESULT_t *parse_string(const char* input_buffer){
+PARSE_RESULT_t* parse_string(const char* input_buffer){
     //Create a PARSE_RESULT_t structure in dynamic memory, and hold pointer in result
     PARSE_RESULT_t* result = (PARSE_RESULT_t*)calloc(1,sizeof(PARSE_RESULT_t));
     //Create a copy of the input buffer string into variable command
@@ -102,4 +102,11 @@ PARSE_RESULT_t *parse_string(const char* input_buffer){
         free(command);
         return result;
     }
+}
+
+
+void getTypes(PARSE_RESULT_t *result) {
+  // TODO improve error catching for improper inputs
+
+  
 }
