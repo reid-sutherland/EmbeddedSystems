@@ -78,7 +78,7 @@ PARSE_RESULT_t* parse_string(const char* input_buffer){
         char* operand = calloc(MAX_VAR_LEN,sizeof(char));
         //Find first operand (strtok_r removes spaces, assignment, and other operators, returning next non-token string
         token = strtok_r(rest, " +-*/=", &rest);
-		printf("%s", rest)
+        printf("%s", rest);
         strcpy(operand,token);
         //Modify left_operand to point at operand location
         result->left_operand = operand;
@@ -107,19 +107,83 @@ PARSE_RESULT_t* parse_string(const char* input_buffer){
 
 /*
 Determine the types of each operand
-Check for errors in parse results
+Check for errors infree parse results
+NOPE -> Removes '' and "".
+NOPE -> "Examp"le" is returned as Examp for now
 
 Returns 1 if no issues
-returns 0 if errors (parse result should be discarded elsewhere)
+Returns 0 if errors (parse result should be discarded elsewhere)
+  (i.e. right operand is null)
 */
 int processParseResult(PARSE_RESULT_t *result) {
 	// TODO improve error catching for improper inputs
+	// TODO make more assumptions which benefit the user
+		// (i.e. treating 'foo' as a string instead of error)
 
 	const char* ro1 = NULL, ro2 = NULL;
+
 	// set shorter variable for convenience
 	if (result->right_operand1 != NULL) {
 		ro1 = result->right_operand1;
+
+		// TODO check for inputs like 'ex'ample' and throw error
+    // char
+    if (ro1[0] == '\'' && ro1[strlen(ro1)-1] == '\'') {
+
+      // char operand ('a') should only be length 3
+			if (strlen(ro1) == 3) {
+				result->right_type1 = CHAR_OP;
+			}
+			// treat 'example' as a string for convenience
+			else if (strlen(ro1) > 3) {
+				result->right_type1 = STRING_OP;
+			}
+    }
+
+		// string
+		else if (ro1[0] == '\"' && ro1[strlen(ro1)-1] == '\"') {
+			result->right_type1 = STRING_OP;
+		}
+
+		// double
+		else if (strpbrk(ro1, ".") != NULL) {
+			// check for numbers only
+			int i = 0;
+			while (ro1[i] != '\0') {
+				if (!isdigit(ro1[i++])) {
+					printf("Syntax error: non-numeral in type double\n");
+					printf("%s", *ro1);
+					printf("processParseResult()\n");
+					return 0;
+				}
+			}
+
+			// check that no more decimals found
+			char* pch = strpbrk(ro1, ".");
+			if (strpbrk(pch+1, ".") == NULL) {
+				result->right_type1 = DOUBLE_OP;
+			}
+			// extra decimals, throw error
+			else {
+				printf("Syntax error: Too many decimals\n");
+				printf("%s", *ro1);
+				printf("processParseResult()\n");
+				return 0;
+			}
+		}
+
+		// int
+		else if ()
+
 	}
+  // right operand1 is null, nothing to assign
+  else {
+		printf("Error: Nothing to assign\n");
+		printf("-- Right operand1 is null\n");
+		printf("processParseResult()\n");
+    return 0;
+  }
+
 
 	// left operand should be a variable, so ignore type for now
 	if (result->right_operand1) {
