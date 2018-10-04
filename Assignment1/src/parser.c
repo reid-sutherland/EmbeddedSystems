@@ -105,8 +105,24 @@ PARSE_RESULT_t* parse_string(const char* input_buffer){
 }
 
 
-void getTypes(PARSE_RESULT_t *result) {
-  // TODO improve error catching for improper inputs
+/*
+Determine the types of each operand
+Check for errors in parse results
 
-  
+Returns 1 if no issues
+returns 0 if errors (parse result should be discarded elsewhere)
+*/
+int processParseResult(PARSE_RESULT_t *result) {
+	// TODO improve error catching for improper inputs
+
+	const char* ro1 = NULL, ro2 = NULL;
+	// set shorter variable for convenience
+	if (result->right_operand1 != NULL) {
+		ro1 = result->right_operand1;
+	}
+
+	// left operand should be a variable, so ignore type for now
+	if (result->right_operand1) {
+
+	}
 }

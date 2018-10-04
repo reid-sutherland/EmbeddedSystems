@@ -56,7 +56,6 @@ DICT_VAR_t* findVariable(DICT_t *dict, const char *varname) {
 
 
 
-
 /*
 Add a variable to the dictionary.
 Returns 1 if write was successful
