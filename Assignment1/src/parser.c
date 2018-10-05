@@ -118,7 +118,7 @@ Returns 0 if errors (parse result should be discarded elsewhere)
 int processParseResult(PARSE_RESULT_t *result) {
 	// TODO improve error catching for improper inputs
 	// TODO make more assumptions which benefit the user
-		// (i.e. treating 'foo' as a string instead of error)
+	// (i.e. treating 'foo' as a string instead of error)
 
 	const char* ro1 = NULL, ro2 = NULL;
 
@@ -127,10 +127,10 @@ int processParseResult(PARSE_RESULT_t *result) {
 		ro1 = result->right_operand1;
 
 		// TODO check for inputs like 'ex'ample' and throw error
-    // char
-    if (ro1[0] == '\'' && ro1[strlen(ro1)-1] == '\'') {
+    	// char
+    	if (ro1[0] == '\'' && ro1[strlen(ro1)-1] == '\'') {
 
-      // char operand ('a') should only be length 3
+			// char operand ('a') should only be length 3
 			if (strlen(ro1) == 3) {
 				result->right_type1 = CHAR_OP;
 			}
@@ -138,7 +138,7 @@ int processParseResult(PARSE_RESULT_t *result) {
 			else if (strlen(ro1) > 3) {
 				result->right_type1 = STRING_OP;
 			}
-    }
+    	}
 
 		// string
 		else if (ro1[0] == '\"' && ro1[strlen(ro1)-1] == '\"') {
@@ -173,20 +173,95 @@ int processParseResult(PARSE_RESULT_t *result) {
 		}
 
 		// int
-		else if ()
-
+		else {
+			int i = 0;
+			while (ro1[i] != '\0') {
+				if (!isdigit(ro1[i++])) {
+					printf("Syntax error: non-numeral in type integer\n");
+					printf("%s", *ro1);
+					printf("processParseResult()\n");
+					return 0;
+				}
+			}
+		}
 	}
-  // right operand1 is null, nothing to assign
-  else {
+ 	// right operand1 is null, nothing to assign
+ 	else {
 		printf("Error: Nothing to assign\n");
 		printf("-- Right operand1 is null\n");
 		printf("processParseResult()\n");
-    return 0;
-  }
+    	return 0;
+  	}
 
+	// repeat the process for operand2
+	// set shorter variable for convenience
+	if (result->right_operand2 != NULL) {
+		ro2 = result->right_operand2;
 
-	// left operand should be a variable, so ignore type for now
-	if (result->right_operand1) {
+		// TODO check for inputs like 'ex'ample' and throw error
+    	// char
+    	if (ro2[0] == '\'' && ro2[strlen(ro2)-1] == '\'') {
 
+			// char operand ('a') should only be length 3
+			if (strlen(ro2) == 3) {
+				result->right_type2 = CHAR_OP;
+			}
+			// treat 'example' as a string for convenience
+			else if (strlen(ro2) > 3) {
+				result->right_type2 = STRING_OP;
+			}
+    	}
+
+		// string
+		else if (ro2[0] == '\"' && ro2[strlen(ro2)-1] == '\"') {
+			result->right_type2 = STRING_OP;
+		}
+
+		// double
+		else if (strpbrk(ro2, ".") != NULL) {
+			// check for numbers only
+			int i = 0;
+			while (ro2[i] != '\0') {
+				if (!isdigit(ro2[i++])) {
+					printf("Syntax error: non-numeral in type double\n");
+					printf("%s", *ro2);
+					printf("processParseResult()\n");
+					return 0;
+				}
+			}
+
+			// check that no more decimals found
+			char* pch = strpbrk(ro2, ".");
+			if (strpbrk(pch+1, ".") == NULL) {
+				result->right_type2 = DOUBLE_OP;
+			}
+			// extra decimals, throw error
+			else {
+				printf("Syntax error: Too many decimals\n");
+				printf("%s", *ro2);
+				printf("processParseResult()\n");
+				return 0;
+			}
+		}
+
+		// int
+		else {
+			int i = 0;
+			while (ro2[i] != '\0') {
+				if (!isdigit(ro2[i++])) {
+					printf("Syntax error: non-numeral in type integer\n");
+					printf("%s", *ro2);
+					printf("processParseResult()\n");
+					return 0;
+				}
+			}
+		}
 	}
+ 	// right operand2 is null, nothing to assign
+ 	else {
+		printf("Error: Nothing to assign\n");
+		printf("-- Right operand2 is null\n");
+		printf("processParseResult()\n");
+    	return 0;
+  	}
 }

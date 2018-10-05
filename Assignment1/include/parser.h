@@ -24,12 +24,12 @@ typedef enum operand_type {
 
 //Result structure to hold operands and operation type
 typedef struct parse_result{
-  char* left_operand;
-  char* right_operand1;
-  char* right_operand2;
-  OPERAND_TYPE_e right_type1;
+	char* left_operand;
+	char* right_operand1;
+	char* right_operand2;
+	OPERAND_TYPE_e right_type1;
 	OPERAND_TYPE_e right_type2;
-  OPTYPE_e optype;
+	OPTYPE_e optype;
 } PARSE_RESULT_t;
 
 //Command Types
