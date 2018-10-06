@@ -34,8 +34,8 @@ EXE = assignment1
 
 all: ${EXE}
 
-${EXE}: ${SRC}/main.c ${SRC}/linkedList.c ${SRC}/parser.c
-	${CC} ${C_FLAGS} -o ${EXE} ${SRC}/main.c ${SRC}/linkedList.c ${SRC}/parser.c ${INCLUDES}
+${EXE}: ${SRC}/main.c ${SRC}/dictionary.c ${SRC}/parser.c ${SRC}/linkedList.c
+	${CC} ${C_FLAGS} -o ${EXE} ${SRC}/main.c ${SRC}/dictionary.c ${SRC}/parser.c ${SRC}/linkedList.c ${INCLUDES}
 
 clean:
 	-rm ${EXE}

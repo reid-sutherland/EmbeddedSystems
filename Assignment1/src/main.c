@@ -38,6 +38,12 @@ int main() {
 		// right2 is null only if a third operand token is not found, function assumes there are at least 2 operands
 		PARSE_RESULT_t* result = parse_string(input_buffer);
 
+		processParseResult(result, DICT_MAIN);
+
+		printResult(result);
+
+		continue;
+
 
 		// take action based result's optype
 		switch (result->optype) {
@@ -61,7 +67,7 @@ int main() {
 				ELEMENT_t element;
 
 				// assignment successful
-				if (writeVariable(DICT_MAIN, result->left_operand, , ))
+				//if (writeVariable(DICT_MAIN, result->left_operand, , ))
 
 
 				break;

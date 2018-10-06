@@ -4,24 +4,25 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "types.h"
+#include "linkedList.h"
 
 // variable that holds variable name, and element with type and value
-struct dictionary_variable{
-	char varname[15];
+typedef struct dictionary_variable{
+	char* varname;
 	ELEMENT_t element;
-	ELEMENET_TYPE_e type;
+	ELEMENT_TYPE_e type;
 	struct dictionary_variable* next;
 } DICT_VAR_t;
 
 // dictionary variable that holds a list
-struct dictionary_list{
-	char varname[15];
+typedef struct dictionary_list{
+	char* varname;
 	struct generic_list_item* list;
-  struct dictionary_variable* next;
+	DICT_VAR_t* next;
 } DICT_LIST_t;
 
 // Dictionary
-struct dictionary{
+typedef struct dictionary{
 	DICT_VAR_t* head;
 	int size;
 } DICT_t;

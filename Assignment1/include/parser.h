@@ -3,8 +3,9 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <cytpe.h>		// isdigit
+#include <ctype.h>		// isdigit
 #include "types.h"
+#include "dictionary.h"
 
 //Enum to hold types of operations
 typedef enum optype{ADD_OP,SUB_OP,MULT_OP,DIV_OP,PRINT_OP,APPEND_OP,ASSIGN_OP} OPTYPE_e;
@@ -41,6 +42,7 @@ typedef struct parse_result{
 
 // parse_string function
 PARSE_RESULT_t* parse_string(const char *input_buffer);
-int processParseResult(PARSE_RESULT_t *result);
+int processParseResult(PARSE_RESULT_t *result, DICT_t *dict);
+void printResult(PARSE_RESULT_t *result);
 
 #endif // PARSER_H

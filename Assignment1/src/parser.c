@@ -115,20 +115,27 @@ Returns 1 if no issues
 Returns 0 if errors (parse result should be discarded elsewhere)
   (i.e. right operand is null)
 */
-int processParseResult(PARSE_RESULT_t *result) {
+int processParseResult(PARSE_RESULT_t *result, DICT_t *dict) {
 	// TODO improve error catching for improper inputs
 	// TODO make more assumptions which benefit the user
 	// (i.e. treating 'foo' as a string instead of error)
 
-	const char* ro1 = NULL, ro2 = NULL;
+	char* ro1 = NULL, ro2 = NULL;
 
 	// set shorter variable for convenience
 	if (result->right_operand1 != NULL) {
 		ro1 = result->right_operand1;
 
+		// variable
+		if (findVariable(dict, ro1) != NULL) {
+			result->right_type1 = VAR_OP;
+		}
+
+		// TODO add list
+
 		// TODO check for inputs like 'ex'ample' and throw error
     	// char
-    	if (ro1[0] == '\'' && ro1[strlen(ro1)-1] == '\'') {
+    	else if (ro1[0] == '\'' && ro1[strlen(ro1)-1] == '\'') {
 
 			// char operand ('a') should only be length 3
 			if (strlen(ro1) == 3) {
@@ -194,13 +201,21 @@ int processParseResult(PARSE_RESULT_t *result) {
   	}
 
 	// repeat the process for operand2
+	// if operand2 is null, assume simple assignment
 	// set shorter variable for convenience
 	if (result->right_operand2 != NULL) {
 		ro2 = result->right_operand2;
 
+		// variable
+		if (findVariable(dict, ro1) != NULL) {
+			result->right_type1 = VAR_OP;
+		}
+
+		// TODO add list
+
 		// TODO check for inputs like 'ex'ample' and throw error
     	// char
-    	if (ro2[0] == '\'' && ro2[strlen(ro2)-1] == '\'') {
+    	else if (ro2[0] == '\'' && ro2[strlen(ro2)-1] == '\'') {
 
 			// char operand ('a') should only be length 3
 			if (strlen(ro2) == 3) {
@@ -257,11 +272,25 @@ int processParseResult(PARSE_RESULT_t *result) {
 			}
 		}
 	}
- 	// right operand2 is null, nothing to assign
- 	else {
-		printf("Error: Nothing to assign\n");
-		printf("-- Right operand2 is null\n");
-		printf("processParseResult()\n");
-    	return 0;
-  	}
+
+	// if we made it to this point, no errors
+	return 1;
+}
+
+
+/*
+Print the parse result
+for debugging and testing
+*/
+void printResult(PARSE_RESULT_t *result) {
+	printf("Print Result ---\n");
+	printf("Left Operand: \t%s\n", result->left_operand);
+	if (result->right_operand1 != NULL)
+		printf("Right Operand1: \t%s\n", result->right_operand1);
+	if (result->right_operand2 != NULL)
+		printf("Right Operand2: \t%s\n", result->right_operand2);
+	printf("Right Type1: \t%d\n", result->right_type1);
+	printf("Right Type2: \t%d\n", result->right_type2);
+	printf("Operation Type: \t%d\n", result->optype);
+	printf("\n");p
 }

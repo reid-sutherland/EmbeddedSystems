@@ -1,5 +1,4 @@
 #include "../include/dictionary.h"
-#include "../include/linkedList.h"
 
 
 /*
@@ -76,7 +75,7 @@ int writeVariable(DICT_t *dict, const char *varname, ELEMENT_TYPE_e type, ELEMEN
 	// variable does not exist, create new
 	else {
 		// create new Var
-		DICT_VAR_t* var = newVariable(dict, varname, type, element);
+		DICT_VAR_t* var = newVariable(varname, type, element);
 
 		// empty dict
 		if (dict->size == 0) {
@@ -113,8 +112,31 @@ int writeVariable(DICT_t *dict, const char *varname, ELEMENT_TYPE_e type, ELEMEN
 	// test whether the write was successful
 	//	code should not reach this point if null values were encountered
 	DICT_VAR_t* test = findVariable(dict, varname);
-	if ( test->varname == varname && test->type == type && test->element == element ) {
-		return 1;
+	if ( strcmp(test->varname, varname) == 0 && test->type == type ) {
+		switch (test->type) {
+			case CHAR:
+				if (test->element.c == element.c)
+					return 1;
+				break;
+			case INT:
+				if (test->element.i == element.i)
+					return 1;
+				break;
+			case DOUBLE:
+				if (test->element.d == element.d)
+					return 1;
+				break;
+			case STRING:
+				if (strcmp(test->element.s, element.s))
+					return 1;
+				break;
+			// TODO add list
+			default:
+				printf("test switch case reached default\n");
+				printf("writeVariable()\n");
+				return 0;
+				break;
+		}
 	}
 	else {
 		printf("Write Error: variable \'%s\' was not written successfully\n", varname);
@@ -166,22 +188,22 @@ void printVariable(DICT_t *dict, const char *varname) {
 	switch (var->type) {
 		case CHAR:
 			// %c for char
-			printf("%c\n", item->element.c);
+			printf("%c\n", var->element.c);
 			break;
 
 		case INT:
 			// %ld for signed long
-			printf("%li\n", item->element.i);
+			printf("%li\n", var->element.i);
 			break;
 
 		case DOUBLE:
 			// %d for double
-			printf("%.5f\n", item->element.d);
+			printf("%.5f\n", var->element.d);
 			break;
 
 		case STRING:
 			// %s for c-string format
-			printf("%s\n", item->element.s);
+			printf("%s\n", var->element.s);
 			break;
 
 		// TODO List
