@@ -8,19 +8,28 @@
 #include "dictionary.h"
 
 //Enum to hold types of operations
-typedef enum optype{ADD_OP,SUB_OP,MULT_OP,DIV_OP,PRINT_OP,APPEND_OP,ASSIGN_OP} OPTYPE_e;
+typedef enum optype{
+	ADD_OP,
+	SUB_OP,
+	MULT_OP,
+	DIV_OP,
+	PRINT_OP,
+	APPEND_OP,
+	ASSIGN_OP
+} OPTYPE_e;
 
 // Enum to hold operand types (OP stands for operand here)
 typedef enum operand_type {
+	// error bit
+	ERROR,		// 0
 	// a dictionary variable
-	VAR_OP,
+	VAR_OP,		// 1
 	// the rest are literal values
-	CHAR_OP,
-	INT_OP,
-	DOUBLE_OP,
-	STRING_OP
-	// TODO add list
-	// , LIST_OP
+	CHAR_OP,	// 2
+	INT_OP,		// 3
+	DOUBLE_OP,	// 4
+	STRING_OP,	// 5
+	LIST_OP		// 6
 } OPERAND_TYPE_e;
 
 //Result structure to hold operands and operation type
@@ -42,7 +51,8 @@ typedef struct parse_result{
 
 // parse_string function
 PARSE_RESULT_t* parse_string(const char *input_buffer);
-int processParseResult(DICT_t* dict, PARSE_RESULT_t *result);
+void processParseResult(DICT_t* dict, PARSE_RESULT_t *result);
+void processOperand(DICT_t* dict, char* operand);
 void printResult(PARSE_RESULT_t *result);
 
 #endif // PARSER_H

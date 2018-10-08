@@ -18,9 +18,6 @@ int main() {
 
 	char input_buffer[101];
 
-
-
-
 	// LOOP
 	while (1) {
 
@@ -36,15 +33,18 @@ int main() {
 			input_buffer[last] = '\0';
 		}
 
-		// char* pch = input_buffer;
-		// while(*pch != '\0') {
-		// 	printf("%c ", *pch);
-		// 	pch++;
-		// }
-		// printf("\n");
+		// check for whitespace
+		char* pch = input_buffer;
+		int isSpace = 1;
+		while (*pch != '\0') {
+			if (!isspace((unsigned char) *pch)) {
+				isSpace = 0;
+			}
+			pch++;
+		}
 
 		// if whitespace, do nothing
-		if (strcmp(input_buffer, "") == 0) {
+		if (isSpace == 1 || strcmp(input_buffer, "") == 0) {
 			continue;
 		}
 		// check for exit
@@ -57,13 +57,6 @@ int main() {
 		// parse_string grabs text up until " +-*/=", stores in left/right1/right2 (in order) each time
 		// right2 is null only if a third operand token is not found, function assumes there are at least 2 operands
 		PARSE_RESULT_t* result = parse_string(input_buffer);
-
-		processParseResult(&dict, result);
-
-		printResult(result);
-
-		continue;
-
 
 		// take action based result's optype
 		switch (result->optype) {
@@ -80,6 +73,11 @@ int main() {
 				break;
 
 			case ASSIGN_OP:
+				// process the operands if it is not a print or append statement
+				processParseResult(&dict, result);
+				// debug
+				// printResult(result);
+
 				// only one operand
 				if (result->right_operand1 == NULL) {
 					// print the left operand variable if it exists
@@ -90,6 +88,7 @@ int main() {
 				// should be only two operands on basic assignment
 				if (result->right_operand2 != NULL) {
 					printf("Syntax Error: Too many operands for assignment\n");
+					break;
 				}
 
 				// parse the parse result
@@ -103,20 +102,39 @@ int main() {
 				break;
 
 			case ADD_OP:
+				// TODO change the parse result process to handle two operand math (i.e. "1 + 2" print)
+				// process the operands if it is not a print or append statement
+				processParseResult(&dict, result);
+				// debug
+				// printResult(result);
 
 				mathOp(&dict, result, ADD_OP);
-
 				break;
 
 			case SUB_OP:
+				// process the operands if it is not a print or append statement
+				processParseResult(&dict, result);
+				// debug
+				// printResult(result);
+
 				mathOp(&dict, result, SUB_OP);
 				break;
 
 			case MULT_OP:
+				// process the operands if it is not a print or append statement
+				processParseResult(&dict, result);
+				// debug
+				// printResult(result);
+
 				mathOp(&dict, result, MULT_OP);
 				break;
 
 			case DIV_OP:
+				// process the operands if it is not a print or append statement
+				processParseResult(&dict, result);
+				// debug
+				// printResult(result);
+
 				mathOp(&dict, result, DIV_OP);
 				break;
 

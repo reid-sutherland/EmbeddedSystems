@@ -7,6 +7,7 @@ Creates, inits, and returns a new variable pointer with allocated memory
 DICT_VAR_t* newVariable(const char *varname, ELEMENT_t element, ELEMENT_TYPE_e type) {
 
 		// TODO enforce variable name rules here
+		
 
 		// create variable object, allocate memory and init
 		DICT_VAR_t* newVar = calloc(1, sizeof(DICT_VAR_t));
@@ -76,6 +77,11 @@ int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_
 	else {
 		// create new Var
 		DICT_VAR_t* var = newVariable(varname, element, type);
+
+		// if error in new Variable, var is null, stop
+		if (var == NULL) {
+			return 0;
+		}
 
 		// empty dict
 		if (dict->size == 0) {
