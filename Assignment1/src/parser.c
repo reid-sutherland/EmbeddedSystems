@@ -56,7 +56,7 @@ PARSE_RESULT_t* parse_string(const char* input_buffer){
         //Iterate through the command string until NULL is found
         while(command[i] != '\0'){
             //Switch on the character
-            switch(rest[i++]){
+            switch(rest[i++]) {
                 case '+': // If add, set optype to ADD_OP
                     result->optype = ADD_OP;
                     break;
@@ -78,15 +78,19 @@ PARSE_RESULT_t* parse_string(const char* input_buffer){
         char* operand = calloc(MAX_VAR_LEN,sizeof(char));
         //Find first operand (strtok_r removes spaces, assignment, and other operators, returning next non-token string
         token = strtok_r(rest, " +-*/=", &rest);
-        printf("%s", rest);
         strcpy(operand,token);
         //Modify left_operand to point at operand location
         result->left_operand = operand;
         //Do the same process for the first right operand
-        operand = calloc(MAX_VAR_LEN,sizeof(char));
+		// Don't assume there are 2 operands
         token = strtok_r(rest, " +-*/=", &rest);
-        strcpy(operand,token);
-        result->right_operand1 = operand;
+		if (token != NULL) {
+			operand = calloc(MAX_VAR_LEN,sizeof(char));
+			strcpy(operand,token);
+	        result->right_operand1 = operand;
+		} else {
+			result->right_operand1 = NULL;
+		}
         //There may or may not be a third operand
         token = strtok_r(rest, " +-*/=", &rest);
         //Check to see if token is NULL, if not, then assign third operand
@@ -115,19 +119,21 @@ Returns 1 if no issues
 Returns 0 if errors (parse result should be discarded elsewhere)
   (i.e. right operand is null)
 */
-int processParseResult(PARSE_RESULT_t *result, DICT_t *dict) {
+int processParseResult(DICT_t* dict, PARSE_RESULT_t *result) {
 	// TODO improve error catching for improper inputs
 	// TODO make more assumptions which benefit the user
 	// (i.e. treating 'foo' as a string instead of error)
 
-	char* ro1 = NULL, ro2 = NULL;
+	char* ro1 = NULL;
+	char* ro2 = NULL;
 
 	// set shorter variable for convenience
 	if (result->right_operand1 != NULL) {
 		ro1 = result->right_operand1;
 
 		// variable
-		if (findVariable(dict, ro1) != NULL) {
+		DICT_VAR_t* var = findVariable(dict, ro1);
+		if (var != NULL) {
 			result->right_type1 = VAR_OP;
 		}
 
@@ -157,9 +163,9 @@ int processParseResult(PARSE_RESULT_t *result, DICT_t *dict) {
 			// check for numbers only
 			int i = 0;
 			while (ro1[i] != '\0') {
-				if (!isdigit(ro1[i++])) {
+				if (!isdigit(ro1[i++]) || ro1[i] != '.') {
 					printf("Syntax error: non-numeral in type double\n");
-					printf("%s", *ro1);
+					printf("%s", ro1);
 					printf("processParseResult()\n");
 					return 0;
 				}
@@ -173,7 +179,7 @@ int processParseResult(PARSE_RESULT_t *result, DICT_t *dict) {
 			// extra decimals, throw error
 			else {
 				printf("Syntax error: Too many decimals\n");
-				printf("%s", *ro1);
+				printf("%s", ro1);
 				printf("processParseResult()\n");
 				return 0;
 			}
@@ -183,9 +189,10 @@ int processParseResult(PARSE_RESULT_t *result, DICT_t *dict) {
 		else {
 			int i = 0;
 			while (ro1[i] != '\0') {
+				result->right_type1 = INT_OP;
 				if (!isdigit(ro1[i++])) {
 					printf("Syntax error: non-numeral in type integer\n");
-					printf("%s", *ro1);
+					printf("%s", ro1);
 					printf("processParseResult()\n");
 					return 0;
 				}
@@ -205,6 +212,7 @@ int processParseResult(PARSE_RESULT_t *result, DICT_t *dict) {
 	// set shorter variable for convenience
 	if (result->right_operand2 != NULL) {
 		ro2 = result->right_operand2;
+		printf("%s\n", ro2);
 
 		// variable
 		if (findVariable(dict, ro1) != NULL) {
@@ -239,7 +247,7 @@ int processParseResult(PARSE_RESULT_t *result, DICT_t *dict) {
 			while (ro2[i] != '\0') {
 				if (!isdigit(ro2[i++])) {
 					printf("Syntax error: non-numeral in type double\n");
-					printf("%s", *ro2);
+					printf("%s", ro2);
 					printf("processParseResult()\n");
 					return 0;
 				}
@@ -253,7 +261,7 @@ int processParseResult(PARSE_RESULT_t *result, DICT_t *dict) {
 			// extra decimals, throw error
 			else {
 				printf("Syntax error: Too many decimals\n");
-				printf("%s", *ro2);
+				printf("%s", ro2);
 				printf("processParseResult()\n");
 				return 0;
 			}
@@ -265,7 +273,7 @@ int processParseResult(PARSE_RESULT_t *result, DICT_t *dict) {
 			while (ro2[i] != '\0') {
 				if (!isdigit(ro2[i++])) {
 					printf("Syntax error: non-numeral in type integer\n");
-					printf("%s", *ro2);
+					printf("%s", ro2);
 					printf("processParseResult()\n");
 					return 0;
 				}
@@ -285,12 +293,14 @@ for debugging and testing
 void printResult(PARSE_RESULT_t *result) {
 	printf("Print Result ---\n");
 	printf("Left Operand: \t%s\n", result->left_operand);
-	if (result->right_operand1 != NULL)
+	if (result->right_operand1 != NULL) {
 		printf("Right Operand1: \t%s\n", result->right_operand1);
-	if (result->right_operand2 != NULL)
+		printf("Right Type1: \t%d\n", result->right_type1);
+	}
+	if (result->right_operand2 != NULL) {
 		printf("Right Operand2: \t%s\n", result->right_operand2);
-	printf("Right Type1: \t%d\n", result->right_type1);
-	printf("Right Type2: \t%d\n", result->right_type2);
+		printf("Right Type2: \t%d\n", result->right_type2);
+	}
 	printf("Operation Type: \t%d\n", result->optype);
-	printf("\n");p
+	printf("\n");
 }

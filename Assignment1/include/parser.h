@@ -42,7 +42,7 @@ typedef struct parse_result{
 
 // parse_string function
 PARSE_RESULT_t* parse_string(const char *input_buffer);
-int processParseResult(PARSE_RESULT_t *result, DICT_t *dict);
+int processParseResult(DICT_t* dict, PARSE_RESULT_t *result);
 void printResult(PARSE_RESULT_t *result);
 
 #endif // PARSER_H

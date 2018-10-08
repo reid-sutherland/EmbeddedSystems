@@ -4,7 +4,7 @@
 /*
 Creates, inits, and returns a new variable pointer with allocated memory
 */
-DICT_VAR_t* newVariable(const char *varname, ELEMENT_TYPE_e type, ELEMENT_t element) {
+DICT_VAR_t* newVariable(const char *varname, ELEMENT_t element, ELEMENT_TYPE_e type) {
 
 		// TODO enforce variable name rules here
 
@@ -30,7 +30,7 @@ returns null if variable not found
 DICT_VAR_t* findVariable(DICT_t *dict, const char *varname) {
 
 	// check for empty dict
-	if (dict->head == NULL) {
+	if (dict->size == 0) {
 		return NULL;
 	}
 
@@ -60,7 +60,7 @@ Add a variable to the dictionary.
 Returns 1 if write was successful
 returns 0 or -1 otherwise
 */
-int writeVariable(DICT_t *dict, const char *varname, ELEMENT_TYPE_e type, ELEMENT_t element) {
+int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_TYPE_e type) {
 
 	// check if variable exists
 	DICT_VAR_t* old = findVariable(dict, varname);
@@ -75,7 +75,7 @@ int writeVariable(DICT_t *dict, const char *varname, ELEMENT_TYPE_e type, ELEMEN
 	// variable does not exist, create new
 	else {
 		// create new Var
-		DICT_VAR_t* var = newVariable(varname, type, element);
+		DICT_VAR_t* var = newVariable(varname, element, type);
 
 		// empty dict
 		if (dict->size == 0) {
@@ -159,8 +159,7 @@ DICT_VAR_t* readVariable(DICT_t *dict, const char *varname) {
 
 	// not found: stop with error
 	if (var == NULL) {
-		printf("Error: No such variable in dict\n");
-		printf("readVariable()\n");
+		printf("Error: Variable \"%s\" not found\n", varname);
 		return NULL;
 	}
 	else {
@@ -180,8 +179,7 @@ void printVariable(DICT_t *dict, const char *varname) {
 
 	// var not found
 	if (var == NULL) {
-		printf("DictError: Variable %s not found\n", varname);
-		printf("printVariable()\n");
+		printf("Dict Error: Variable %s not found\n", varname);
 		return;
 	}
 

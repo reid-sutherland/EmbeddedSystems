@@ -28,9 +28,9 @@ typedef struct dictionary{
 } DICT_t;
 
 // headers
-DICT_VAR_t* newVariable(const char *varname, ELEMENT_TYPE_e type, ELEMENT_t element);
+DICT_VAR_t* newVariable(const char *varname, ELEMENT_t element, ELEMENT_TYPE_e type);
 DICT_VAR_t* findVariable(DICT_t *dict, const char *varname);
-int writeVariable(DICT_t *dict, const char *varname, ELEMENT_TYPE_e type, ELEMENT_t element);
+int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_TYPE_e type);
 DICT_VAR_t* readVariable(DICT_t *dict, const char *varname);
 void printVariable(DICT_t *dict, const char *varname);
 

@@ -1,21 +1,24 @@
+#include <string.h>
 #include <stdio.h>
 #include <time.h>
 #include "../include/linkedList.h"
 #include "../include/parser.h"
 
 // function headers
-void mathOp(PARSE_RESULT_t* parse_result, OPTYPE_e);
+void mathOp(DICT_t* dict, PARSE_RESULT_t* parse_result, OPTYPE_e);
 void testParser();
-
-
-// global pointer to main dictionary
-DICT_t * DICT_MAIN;
 
 
 int main() {
 
 	// SETUP
+	DICT_t dict;
+	dict.size = 0;
+	dict.head = NULL;
+
 	char input_buffer[101];
+
+
 
 
 	// LOOP
@@ -25,8 +28,25 @@ int main() {
 		printf(">>> ");
 
 		// read input
-		scanf("%100s", input_buffer);
+		fgets(input_buffer, 100, stdin);
 
+		// lets get rid of that newline if it's there
+		int last = strlen(input_buffer) - 1;
+		if (input_buffer[last] == '\n') {
+			input_buffer[last] = '\0';
+		}
+
+		// char* pch = input_buffer;
+		// while(*pch != '\0') {
+		// 	printf("%c ", *pch);
+		// 	pch++;
+		// }
+		// printf("\n");
+
+		// if whitespace, do nothing
+		if (strcmp(input_buffer, "") == 0) {
+			continue;
+		}
 		// check for exit
 		if (strcmp(input_buffer, "exit()") == 0 || strcmp(input_buffer, "exit") == 0) {
 			break;
@@ -38,7 +58,7 @@ int main() {
 		// right2 is null only if a third operand token is not found, function assumes there are at least 2 operands
 		PARSE_RESULT_t* result = parse_string(input_buffer);
 
-		processParseResult(result, DICT_MAIN);
+		processParseResult(&dict, result);
 
 		printResult(result);
 
@@ -51,15 +71,25 @@ int main() {
 				break;
 
 			case PRINT_OP:
+				if (result->left_operand != NULL) {
+					printVariable(&dict, result->left_operand);
+				}
+				else {
+					printf("Syntax Error: print() field is empty, nothing to print\n");
+				}
 				break;
 
 			case ASSIGN_OP:
-				// ensure there is something to assign
-				if (result->right_operand1 != NULL) {
-					printf("Error: Nothing to assign\n");
-					printf("---- Right operand1 null\n");
-					printf("main result->optype switch\n");
+				// only one operand
+				if (result->right_operand1 == NULL) {
+					// print the left operand variable if it exists
+					printVariable(&dict, result->left_operand);
 					break;
+				}
+
+				// should be only two operands on basic assignment
+				if (result->right_operand2 != NULL) {
+					printf("Syntax Error: Too many operands for assignment\n");
 				}
 
 				// parse the parse result
@@ -73,20 +103,21 @@ int main() {
 				break;
 
 			case ADD_OP:
-				mathOp(result, ADD_OP);
+
+				mathOp(&dict, result, ADD_OP);
 
 				break;
 
 			case SUB_OP:
-				mathOp(result, SUB_OP);
+				mathOp(&dict, result, SUB_OP);
 				break;
 
 			case MULT_OP:
-				mathOp(result, MULT_OP);
+				mathOp(&dict, result, MULT_OP);
 				break;
 
 			case DIV_OP:
-				mathOp(result, DIV_OP);
+				mathOp(&dict, result, DIV_OP);
 				break;
 
 			default:
@@ -101,7 +132,7 @@ int main() {
 }
 
 
-void mathOp(PARSE_RESULT_t* parse_result, OPTYPE_e op) {
+void mathOp(DICT_t* dict, PARSE_RESULT_t* parse_result, OPTYPE_e op) {
 	printf("MathOp\n");
 
 

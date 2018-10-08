@@ -10,7 +10,7 @@ void printItem(const GENERIC_LIST_ITEM_t *item){
 			// %c for char
 			printf("%c\n", item->element.c);
 			break;
-		case SINT_32:
+		case INT:
 			// %ld for signed long
 			printf("%li\n", item->element.i);
 			break;
