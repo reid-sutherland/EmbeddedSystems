@@ -23,7 +23,7 @@ PARSE_RESULT_t* parse_string(const char* input_buffer){
         //Ignore first token (says print)
         strtok_r(rest, "()", &rest);
         //Make a string in dynamic memory to hold the variable operand
-        char* operand = calloc(MAX_VAR_LEN,sizeof(char));
+        char* operand = calloc(MAX_OPERAND_LEN,sizeof(char));
         token = strtok_r(rest, "()", &rest);
         //Copy the token onto the operand
         strcpy(operand,token);
@@ -39,7 +39,7 @@ PARSE_RESULT_t* parse_string(const char* input_buffer){
         //Ignore first token (says print)
         strtok_r(rest, "()", &rest);
         //Make a string in dynamic memory to hold the variable operand
-        char* operand = calloc(MAX_VAR_LEN,sizeof(char));
+        char* operand = calloc(MAX_OPERAND_LEN,sizeof(char));
         token = strtok_r(rest, "()", &rest);
         //Copy the token onto the operand
         strcpy(operand,token);
@@ -75,7 +75,7 @@ PARSE_RESULT_t* parse_string(const char* input_buffer){
         }
         //Optype is now set to correct OPTYPE, time to find the operands
         //Get default memory to hold the operand strings
-        char* operand = calloc(MAX_VAR_LEN,sizeof(char));
+        char* operand = calloc(MAX_OPERAND_LEN,sizeof(char));
         //Find first operand (strtok_r removes spaces, assignment, and other operators, returning next non-token string
         token = strtok_r(rest, " +-*/=", &rest);
         strcpy(operand,token);
@@ -85,7 +85,7 @@ PARSE_RESULT_t* parse_string(const char* input_buffer){
 		// Don't assume there are 2 operands
         token = strtok_r(rest, " +-*/=", &rest);
 		if (token != NULL) {
-			operand = calloc(MAX_VAR_LEN,sizeof(char));
+			operand = calloc(MAX_OPERAND_LEN,sizeof(char));
 			strcpy(operand,token);
 	        result->right_operand1 = operand;
 		} else {
@@ -96,7 +96,7 @@ PARSE_RESULT_t* parse_string(const char* input_buffer){
         //Check to see if token is NULL, if not, then assign third operand
         if(token!=NULL){
             //If not NULL, set right operand2 to last token
-            operand = calloc(MAX_VAR_LEN,sizeof(char));
+            operand = calloc(MAX_OPERAND_LEN,sizeof(char));
             strcpy(operand,token);
             result->right_operand2 = operand;
         }else{
@@ -120,227 +120,125 @@ Returns 0 if errors (parse result should be discarded elsewhere)
   (i.e. right operand is null)
 */
 void processParseResult(DICT_t* dict, PARSE_RESULT_t *result) {
-	// TODO improve error catching for improper inputs
-	// TODO make more assumptions which benefit the user
-	// (i.e. treating 'foo' as a string instead of error)
 
-	char* ro1 = NULL;
-	char* ro2 = NULL;
-
-	// set shorter variable for convenience
+	// don't process (or assign) a null operand
 	if (result->right_operand1 != NULL) {
-		ro1 = result->right_operand1;
+		int whichOper = 1;
+		processOperand(dict, result, result->right_operand1, whichOper);
+	}
+	if (result->right_operand2 != NULL) {
+		int whichOper = 2;
+		processOperand(dict, result, result->right_operand2, whichOper);
+	}
+}
 
-		// check for int/double
-		int i = 0, isInt = 1, isDouble = 1, decimalCount = 0;
-		while (ro1[i] != '\0') {
-			if (!isdigit(ro1[i])) {
-				isInt = 0;
-				if (ro1[i] == '.') {
-					decimalCount++;
-				}
-				// if other character besides . or number,
-				// it is not int or double
-				else {
-					isDouble = 0;
-				}
+void processOperand(DICT_t* dict, PARSE_RESULT_t* result, char* operand, int whichOper) {
+	// TODO improve error catching for improper inputs ()
+	// TODO check for inputs like 'ex'ample' and "ex"ample" and throw error
+
+	// operand type
+	OPERAND_TYPE_e oper_type;
+
+	// check for int/double
+	int i = 0, isInt = 1, isDouble = 1, decimalCount = 0;
+	while (operand[i] != '\0') {
+		if (!isdigit(operand[i])) {
+			isInt = 0;
+			if (operand[i] == '.') {
+				decimalCount++;
 			}
-			i++;
-		}
-
-		// int
-		if (isInt) {
-			isDouble = 0;
-			result->right_type1 = INT_OP;
-		}
-
-		// double
-		else if (isDouble) {
-			// too many decimals, throw error
-			if (decimalCount > 1) {
-				printf("Syntax error: Too many decimals in type double\n");
-				printf("%s\n", ro1);
-				result->right_type1 = ERROR;
-				return;
-			} else if (decimalCount < 1) {
-				// if we have a double with no decimals somehow, debug
-				printf("Programmer error: Somehow we have no decimals in type double, ");
-				printf("check processParseResult()\n");
-				return;
-			} else {
-				result->right_type1 = DOUBLE_OP;
-			}
-		}
-
-		// // int
-		// else {
-		// 	int i = 0;
-		// 	while (ro1[i] != '\0') {
-		// 		result->right_type1 = INT_OP;
-		// 		if (!isdigit(ro1[i++])) {
-		// 			printf("Syntax error: non-numeral in type integer\n");
-		// 			printf("%s", ro1);
-		// 			printf("processParseResult()\n");
-		// 			return 0;
-		// 		}
-		// 	}
-		// }
-
-		// // double
-		// else if (strpbrk(ro1, ".") != NULL) {
-		// 	// check for numbers only
-		// 	int i = 0;
-		// 	while (ro1[i] != '\0') {
-		// 		if (!isdigit(ro1[i++]) || ro1[i] != '.') {
-		// 			printf("Syntax error: non-numeral in type double\n");
-		// 			printf("%s", ro1);
-		// 			printf("processParseResult()\n");
-		// 			return 0;
-		// 		}
-		// 	}
-		//
-		// 	// check that no more decimals found
-		// 	char* pch = strpbrk(ro1, ".");
-		// 	if (strpbrk(pch+1, ".") == NULL) {
-		// 		result->right_type1 = DOUBLE_OP;
-		// 	}
-		// 	// extra decimals, throw error
-		// 	else {
-		// 		printf("Syntax error: Too many decimals\n");
-		// 		printf("%s", ro1);
-		// 		printf("processParseResult()\n");
-		// 		return 0;
-		// 	}
-		// }
-
-		// TODO check for inputs like 'ex'ample' and throw error
-    	// char
-    	else if (ro1[0] == '\'' && ro1[strlen(ro1)-1] == '\'') {
-
-			// char operand ('a') should only be length 3
-			if (strlen(ro1) == 3) {
-				result->right_type1 = CHAR_OP;
-			}
-			else if (strlen(ro1) > 3) {
-				printf("Operand Error: char should be a single ASCII character\n");
-				printf("  -> %s\n", ro1);
-				result->right_type1 = ERROR;
-			}
-			// TODO optionally replace error with this if Nelson approves
-			// treat 'example' as a string for convenience
-			// else if (strlen(ro1) > 3) {
-			// 	result->right_type1 = STRING_OP;
-			// }
-    	}
-
-		// string
-		else if (ro1[0] == '\"' && ro1[strlen(ro1)-1] == '\"') {
-			result->right_type1 = STRING_OP;
-		}
-
-		// operand is either variable, list, or something else
-		else {
-			// variable
-			DICT_VAR_t* var = findVariable(dict, ro1);
-			if (var != NULL) {
-				result->right_type1 = VAR_OP;
-			}
-
-			// TODO add list
-
-			// at this point, treat it as a variable typo
+			// if other character besides . or number,
+			// it is not int or double
 			else {
-				printf("Operand Error: Unable to identify the operand/variable\n");
-				printf("  -> %s\n", ro1);
-				result->right_type1 = ERROR;
-				return;
+				isDouble = 0;
 			}
+		}
+		i++;
+	}
+
+	// int
+	if (isInt) {
+		isDouble = 0;
+		oper_type = INT_OP;
+	}
+
+	// double
+	else if (isDouble) {
+		// too many decimals, throw error
+		if (decimalCount > 1) {
+			printf("Syntax error: Too many decimals in type double\n");
+			printf("%s\n", operand);
+			oper_type = ERROR_OP;
+			return;
+		} else if (decimalCount < 1) {
+			//TODO remove prints
+			// if we have a double with no decimals somehow, debug
+			printf("Programmer error: Somehow we have no decimals in type double, ");
+			printf("check processParseResult()\n");
+			oper_type = ERROR_OP;
+			return;
+		} else {
+			oper_type = DOUBLE_OP;
 		}
 	}
- 	// // right operand1 is null, nothing to assign
- 	// else {
-	// 	printf("Error: Nothing to assign\n");
-	// 	printf("-- Right operand1 is null\n");
-	// 	printf("processParseResult()\n");
-    // 	return 0;
-  	// }
 
-	// repeat the process for operand2
-	// if operand2 is null, assume simple assignment
-	// set shorter variable for convenience
-	if (result->right_operand2 != NULL) {
-		ro2 = result->right_operand2;
-		printf("%s\n", ro2);
+	// char
+	else if (operand[0] == '\'' && operand[strlen(operand)-1] == '\'') {
 
+		// char operand ('a') should only be length 3
+		if (strlen(operand) == 3) {
+			oper_type = CHAR_OP;
+		}
+		else if (strlen(operand) > 3) {
+			printf("Operand Error: char should be a single ASCII character\n");
+			printf("  -> %s\n", operand);
+
+			oper_type = ERROR_OP;
+			return;
+		}
+		// TODO optionally replace error with this if Nelson approves
+		// treat 'example' as a string for convenience
+		// else if (strlen(operand) > 3) {
+		// 	oper_type = STRING_OP;
+		// }
+	}
+
+	// string
+	else if (operand[0] == '\"' && operand[strlen(operand)-1] == '\"') {
+		oper_type = STRING_OP;
+		// enforce 50 character string limit
+		if (strlen(operand) > 52) {	// 50 + "" = 52
+			// terminate 53rd char with null character
+			operand[51] = '\"';
+			operand[52] = '\0';
+		}
+	}
+
+	// operand is either variable, list, or something else (not expected)
+	else {
 		// variable
-		if (findVariable(dict, ro1) != NULL) {
-			result->right_type1 = VAR_OP;
+		DICT_VAR_t* var = findVariable(dict, operand);
+		if (var != NULL) {
+			oper_type = VAR_OP;
 		}
 
 		// TODO add list
 
-		// TODO check for inputs like 'ex'ample' and throw error
-    	// char
-    	else if (ro2[0] == '\'' && ro2[strlen(ro2)-1] == '\'') {
-
-			// char operand ('a') should only be length 3
-			if (strlen(ro2) == 3) {
-				result->right_type2 = CHAR_OP;
-			}
-			// treat 'example' as a string for convenience
-			else if (strlen(ro2) > 3) {
-				result->right_type2 = STRING_OP;
-			}
-    	}
-
-		// string
-		else if (ro2[0] == '\"' && ro2[strlen(ro2)-1] == '\"') {
-			result->right_type2 = STRING_OP;
-		}
-
-		// double
-		else if (strpbrk(ro2, ".") != NULL) {
-			// check for numbers only
-			int i = 0;
-			while (ro2[i] != '\0') {
-				if (!isdigit(ro2[i++])) {
-					printf("Syntax error: non-numeral in type double\n");
-					printf("%s", ro2);
-					printf("processParseResult()\n");
-					return;
-				}
-			}
-
-			// check that no more decimals found
-			char* pch = strpbrk(ro2, ".");
-			if (strpbrk(pch+1, ".") == NULL) {
-				result->right_type2 = DOUBLE_OP;
-			}
-			// extra decimals, throw error
-			else {
-				printf("Syntax error: Too many decimals\n");
-				printf("%s", ro2);
-				printf("processParseResult()\n");
-				return;
-			}
-		}
-
-		// int
+		// at this point, treat it as a variable typo
 		else {
-			int i = 0;
-			while (ro2[i] != '\0') {
-				if (!isdigit(ro2[i++])) {
-					printf("Syntax error: non-numeral in type integer\n");
-					printf("%s", ro2);
-					printf("processParseResult()\n");
-					return;
-				}
-			}
+			printf("Operand Error: Unable to identify the operand/variable\n");
+			printf("  -> %s\n", operand);
+			oper_type = ERROR_OP;
+			return;
 		}
 	}
-}
 
-void processOperand(DICT_t* dict, char* operand) {
+	// assign the oper_type to the appropriate struct value
+	if (whichOper == 1) {
+		result->right_type1 = oper_type;
+	} else if (whichOper == 2) {
+		result->right_type2 = oper_type;
+	}
 }
 
 
@@ -361,4 +259,16 @@ void printResult(PARSE_RESULT_t *result) {
 	}
 	printf("Operation Type: \t%d\n", result->optype);
 	printf("\n");
+}
+
+
+char* removeQuotes(char* str) {
+	char* newStr = (char*) calloc(strlen(str), sizeof(char));
+
+	for (int i = 1; i < strlen(str) - 1; i++) {
+		newStr[i-1] = str[i];
+	}
+	newStr[strlen(str) - 1] = '\0';
+
+	return newStr;
 }

@@ -1,15 +1,13 @@
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
 
-#include <stdlib.h>
-#include <stdio.h>
 #include "types.h"
 
 //Item in a list; holds element, element type, and the address of the next item
 typedef struct generic_list_item{
 	ELEMENT_t element;
 	ELEMENT_TYPE_e type;
-	struct generic_list_item* nextItem;
+	struct generic_list_item* next;
 } GENERIC_LIST_ITEM_t;
 
 //List structure; Has pointer to first item and a size

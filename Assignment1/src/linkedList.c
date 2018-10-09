@@ -51,11 +51,11 @@ void addElement(GENERIC_LIST_t *list, ELEMENT_TYPE_e type, ELEMENT_t element){
 		GENERIC_LIST_ITEM_t* current;
 		current = list->head;
 		// loop to the last item
-		while (current->nextItem != NULL) {
-			current = current->nextItem;
+		while (current->next != NULL) {
+			current = current->next;
 		}
 		// append element
-		current->nextItem = item;
+		current->next = item;
 		// increment list size
 		list->size += 1;
 	}
@@ -76,7 +76,7 @@ void removeElement(GENERIC_LIST_t *list,int index){
 	if (index == 0) {
 		GENERIC_LIST_ITEM_t *current = list->head;
 		// replace head with pointer to next element
-		list->head = list->head->nextItem;
+		list->head = list->head->next;
 		// decrement size
 		list->size -= 1;
 		// free the memory
@@ -93,20 +93,20 @@ void removeElement(GENERIC_LIST_t *list,int index){
 		// loop to the item with the specified index
 		for (int i = 0; i < index; i++) {
 			// just in case, check for null
-			if (current->nextItem != NULL) {
+			if (current->next != NULL) {
 				prev = current;
-				current = current->nextItem;
+				current = current->next;
 			}
 		}
 
 		// remove current
-		if (current->nextItem == NULL) {
+		if (current->next == NULL) {
 			// if current is last, make previous point to null
-			prev->nextItem = NULL;
+			prev->next = NULL;
 		}
 		else {
 			// otherwise, make prev point to current next
-			prev->nextItem = current->nextItem;
+			prev->next = current->next;
 		}
 
 		// free the memory
@@ -139,9 +139,9 @@ void printList(const GENERIC_LIST_t *list){
 		// print item
 		printItem(item);
 
-		if (item->nextItem != NULL) {
+		if (item->next != NULL) {
 			// iterate the pointer
-			item = item->nextItem;
+			item = item->next;
 		}
 		else {
 			printf("\n");

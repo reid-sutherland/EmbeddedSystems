@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 // Define list struct here so it can be referenced in element
 // struct generic_list;
@@ -18,12 +19,12 @@ typedef union element{
 
 //Use this enum type to specify which element type is being used
 typedef enum element_type{
+	ERROR, 		//place holder so the enum matches the operand type enum
 	CHAR,
 	INT,
 	DOUBLE,
-	STRING
-	// TODO add list
-	// , LIST
+	STRING,
+	LIST
 } ELEMENT_TYPE_e;
 
 
