@@ -16,10 +16,10 @@ typedef struct generic_list{
 	int size;
 } GENERIC_LIST_t;
 
-void printItem(const GENERIC_LIST_ITEM_t *item);
-void addElement(GENERIC_LIST_t *list, ELEMENT_TYPE_e type, ELEMENT_t element);
+void addElement(GENERIC_LIST_t *list, ELEMENT_t element, ELEMENT_TYPE_e type);
 void removeElement(GENERIC_LIST_t *list, int index);
 ELEMENT_t getElement(GENERIC_LIST_t *list, int index);
+void printItem(const GENERIC_LIST_ITEM_t *item);
 void printList(const GENERIC_LIST_t *list, int topList);
 
 #endif // LINKEDLIST_H

@@ -12,16 +12,16 @@ DICT_VAR_t* newVariable(char *varname, ELEMENT_t element, ELEMENT_TYPE_e type) {
 		}
 		// first character must be alpha...
 		if (!isalpha(varname[0])) {
+			printf("  -> %s\n\n", varname);
 			printf("Syntax Error: Variable names must start with an alphabetic character\n");
-			printf("  -> %s\n", varname);
 			return NULL;
 		}
 		// ... and the rest must be alphanumeric
 		int i = 0;
 		while (varname[i] != '\0') {
 			if (!isalnum(varname[i])) {
+				printf("  -> %s\n\n", varname);
 				printf("Syntax Error: Variable names must be alphanumeric\n");
-				printf("  -> %s\n", varname);
 				return NULL;
 			}
 			i++;
@@ -84,7 +84,8 @@ DICT_VAR_t* readVariable(DICT_t *dict, const char *varname) {
 
 	// not found: stop with error
 	if (var == NULL) {
-		printf("Error: Variable \"%s\" not found\n", varname);
+		printf("  -> %s\n\n", varname);
+		printf("Error: Variable not found in dictionary\n", varname);
 		return NULL;
 	}
 	else {
@@ -98,7 +99,7 @@ Add a variable to the dictionary.
 Returns 1 if write was successful
 returns 0 or -1 otherwise
 */
-int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_TYPE_e element_type, GENERIC_LIST_t* list) {
+int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_TYPE_e element_type) {
 
 	// check if variable exists
 	DICT_VAR_t* old = findVariable(dict, varname);
@@ -221,7 +222,8 @@ void printVariable(DICT_t *dict, const char *varname) {
 
 	// var not found
 	if (var == NULL) {
-		printf("Print Error: Variable %s not found\n", varname);
+		printf("  -> %s\n\n", varname);
+		printf("Print Error: Variable not found\n", varname);
 		return;
 	}
 
@@ -244,7 +246,7 @@ void printVariable(DICT_t *dict, const char *varname) {
 			printf("\"%s\"\n", var->element.s);
 			break;
 		case LIST:
-			// printList(var->list, 1);
+			printList(var->element.l, 1);
 			break;
 		default:
 			printf("Could not print - Unrecognized type\n");

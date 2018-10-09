@@ -262,15 +262,9 @@ void processParseResult(DICT_t* dict, PARSE_RESULT_t *result) {
 	// don't process (or assign) a null operand
 	if (result->right_operand1 != NULL) {
 		result->right_type1 = processOperand(dict, result->right_operand1);
-		if (result->right_type1 != ERROR_OP) {
-			printf("right_operand1 = %s\n", result->right_operand1);
-		}
 	}
 	if (result->right_operand2 != NULL) {
 		result->right_type2 = processOperand(dict, result->right_operand2);
-		if (result->right_type2 != ERROR_OP) {
-			printf("right_operand2 = %s\n", result->right_operand2);
-		}
 	}
 }
 
@@ -280,18 +274,22 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
 	// check for char, string, and list
 	//  much be at least length 2
 	if (strlen(operand) > 1) {
-		// printf("$%s$\n", operand);
-		// char
+
+		// CHAR
 		if (operand[0] == '\'' && operand[strlen(operand)-1] == '\'') {
-			// printf("\'\'\'\n");
-			// char operand ('a') should only be length 3
-			if (strlen(operand) <= 3) {
-				// printf("<= 3\n");
+			// char operand ('a') should only be length 2 or 3
+			if (strlen(operand) == 2) {
+				*operand = NULL;
+			}
+			else if (strlen(operand) == 3) {
+				// char c = operand[1];
+				*operand = operand[1];
+				operand[1] = '\0';
 				return CHAR_OP;
 			}
 			else if (strlen(operand) > 3) {
+				printf("  -> %s\n\n", operand);
 				printf("Syntax Error: char should be a single ASCII character\n");
-				printf("  -> %s\n", operand);
 				return ERROR_OP;
 			}
 			// TODO check for 'exam'ple'
@@ -301,9 +299,8 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
 			// 	oper_type = STRING_OP;
 			// }
 		}
-		// string
+		// STRING
 		else if (operand[0] == '\"' && operand[strlen(operand)-1] == '\"') {
-			return STRING_OP;
 			// enforce 50 character string limit
 			if (strlen(operand) > 52) {	// 50 + "" = 52
 				// terminate 53rd char with null character
@@ -311,10 +308,27 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
 				operand[52] = '\0';
 			}
 			// TODO check for "exam"ple"
+			// remove the quotations from the operand
+			removeQuotes(operand);
+			return STRING_OP;
 		}
-		// list
+		// LIST
 		else if (operand[0] == '[' && operand[strlen(operand)-1] == ']') {
-			return LIST_OP;
+			// for now, only kind of list operand should be initialization "[]"
+			if (strcmp(operand, "[]") == 0) {
+				return LIST_OP;
+			} else {
+				printf("  -> %s\n\n", operand);
+				printf("Syntax Error: Improper list syntax\n");
+				return ERROR_OP;
+			}
+		}
+		// INDEX
+		else if (strchr(operand, '[') != NULL && strchr(operand, ']') != NULL) {
+			// parsing the index symbol will have to be done elsewhere
+			// for now just make sure its valid and return if valid
+			
+			return INDEX_OP;
 		}
 	}
 
@@ -336,17 +350,17 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
 		i++;
 	}
 
-	// int
+	// INT
 	if (isInt) {
 		isDouble = 0;
 		return INT_OP;
 	}
-	// double
+	// DOUBLE
 	else if (isDouble) {
 		// too many decimals, throw error
 		if (decimalCount > 1) {
+			printf("  -> %s\n\n", operand);
 			printf("Syntax error: Too many decimals in type double\n");
-			printf("  -> %s\n", operand);
 			return ERROR_OP;
 		} else if (decimalCount < 1) {
 			//TODO remove prints
@@ -360,18 +374,21 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
 	}
 	// operand is either variable, or something else (not expected)
 	else {
-		// variable
+		// VARIABLE
 		DICT_VAR_t* var = findVariable(dict, operand);
 		if (var != NULL) {
 			return VAR_OP;
 		}
 		// at this point, treat it as a variable typo
 		else {
+			printf("  -> %s\n\n", operand);
 			printf("Operand Error: Unable to identify the operand/variable\n");
-			printf("  -> %s\n", operand);
 			return ERROR_OP;
 		}
 	}
+
+	// if we somehow got to the end, return error
+	return ERROR_OP;
 }
 
 
@@ -395,13 +412,32 @@ void printResult(PARSE_RESULT_t *result) {
 }
 
 
-char* removeQuotes(char* str) {
+// char* removeQuotes(char* str) {
+// 	char* newStr = (char*) calloc(strlen(str), sizeof(char));
+//
+// 	for (int i = 1; i < strlen(str) - 1; i++) {
+// 		newStr[i-1] = str[i];
+// 	}
+// 	newStr[strlen(str) - 1] = '\0';
+//
+// 	return newStr;
+// }
+
+/*
+Remove the quotations from the outside of the char buffer
+*/
+void removeQuotes(char* str) {
 	char* newStr = (char*) calloc(strlen(str), sizeof(char));
+	strcpy(newStr, str);
 
-	for (int i = 1; i < strlen(str) - 1; i++) {
-		newStr[i-1] = str[i];
+	for (int i = 1; i < strlen(str)-1; i++) {
+		str[i-1] = newStr[i];
 	}
-	newStr[strlen(str) - 1] = '\0';
-
-	return newStr;
+	str[strlen(newStr)-2] = '\0';
 }
+
+/*
+Checks for bracket operator syntax
+i.e mylist[3]
+*/
+int parseBrackets()

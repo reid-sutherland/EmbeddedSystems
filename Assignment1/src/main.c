@@ -64,17 +64,84 @@ int main() {
 
 		// take action based result's optype
 		switch (result->optype) {
-			case APPEND_OP:
-				if (result->left_operand != NULL) {
 
+			// *****************
+			// APPEND
+			// *****************
+			case APPEND_OP: {
+				// empty list argument
+				if (result->left_operand == NULL) {
+					printf("\n\n");
+					printf("Syntax Error: No list specified\n");
+					break;
 				}
-				// error
-				if (result->right_operand1 == NULL || result->right_type1 == ERROR_OP) {
+				// empty/error append argument
+				else if (result->right_operand1 == NULL || result->right_type1 == ERROR_OP) {
+					printf("\n\n");
 					printf("Syntax Error: Nothing to append\n");
 					break;
 				}
-				break;
 
+				// append the element to the list
+				DICT_VAR_t* var = readVariable(&dict, result->left_operand);
+				ELEMENT_t element;
+				ELEMENT_TYPE_e element_type;
+				if (var != NULL) {
+
+					switch (result->right_type1) {
+						case CHAR_OP: {
+							// TODO figure out how to print '' instead of 0
+							char *c = result->right_operand1;
+							element.c = *c;
+							element_type = CHAR;
+							break;
+						}
+						case INT_OP:
+							element.i = atoi(result->right_operand1);
+							element_type = INT;
+							break;
+						case DOUBLE_OP:
+							element.d = atof(result->right_operand1);
+							element_type = DOUBLE;
+							break;
+						case STRING_OP:
+							element.s = result->right_operand1;
+							element_type = STRING;
+							break;
+						case LIST_OP: {
+							// TODO change this if I allow more than [] (initialization) as operand
+							// allocate space for and initialize list
+							GENERIC_LIST_t* list = (GENERIC_LIST_t*) calloc(1, sizeof(GENERIC_LIST_t));
+							list->head = NULL;
+							list->size = 0;
+							element.l = list;
+							element_type = LIST;
+							break;
+						}
+						case VAR_OP: {
+							DICT_VAR_t* opVar = readVariable(&dict, result->right_operand1);
+							// break if variable not found
+							if (opVar == NULL) {
+								break;
+							} else {
+								element = opVar->element;
+								element_type = opVar->type;
+							}
+							break;
+						}
+						default:
+							break;
+					}
+					// append the element to the list
+					addElement(var->element.l, element, element_type);
+				}
+
+				break;
+			}
+
+			// *****************
+			// PRINT
+			// *****************
 			case PRINT_OP:
 				if (result->left_operand != NULL) {
 					printVariable(&dict, result->left_operand);
@@ -84,14 +151,18 @@ int main() {
 				}
 				break;
 
-			case ASSIGN_OP:
+			// *****************
+			// ASSIGN
+			// *****************
+			case ASSIGN_OP: {
 				// only one operand
 				if (result->right_operand1 == NULL) {
 					// print the left operand variable if it exists
-					printVariable(&dict, result->left_operand);
+					if (readVariable(&dict, result->left_operand) != NULL) {
+						printVariable(&dict, result->left_operand);
+					}
 					break;
 				}
-
 				// should be only two operands on basic assignment
 				if (result->right_operand2 != NULL) {
 					printf("Syntax Error: Too many operands for assignment\n");
@@ -100,46 +171,43 @@ int main() {
 
 				// parse the operand to be assigned
 				// variables
-				DICT_VAR_t* opVar;
 				ELEMENT_t element;
 				ELEMENT_TYPE_e element_type;
-				char* c = result->right_operand1;
 
 				// write flag
 				int write = 1;
 				switch (result->right_type1) {
-					case CHAR_OP:
-						// if empty char, set c to null
-						if (strlen(c) == 2) {
-							element.c = NULL;
-						} else {
-							// index 1 should be the char between ''
-							element.c = c[1];
-						}
+					case CHAR_OP: {
+						// TODO figure out how to print '' instead of 0
+						char *c = result->right_operand1;
+						element.c = *c;
 						element_type = CHAR;
 						break;
-
+					}
 					case INT_OP:
 						element.i = atoi(result->right_operand1);
 						element_type = INT;
 						break;
-
 					case DOUBLE_OP:
 						element.d = atof(result->right_operand1);
 						element_type = DOUBLE;
 						break;
-
 					case STRING_OP:
 						element.s = result->right_operand1;
 						element_type = STRING;
 						break;
-
-					// case LIST_OP:
-					//
-					// 	element_type = LIST;
-
-					case VAR_OP:
-						opVar = readVariable(&dict, result->right_operand1);
+					case LIST_OP: {
+						// TODO change this if I allow more than [] (initialization) as operand
+						// allocate space for and initialize list
+						GENERIC_LIST_t* list = (GENERIC_LIST_t*) calloc(1, sizeof(GENERIC_LIST_t));
+						list->head = NULL;
+						list->size = 0;
+						element.l = list;
+						element_type = LIST;
+						break;
+					}
+					case VAR_OP: {
+						DICT_VAR_t* opVar = readVariable(&dict, result->right_operand1);
 						// break if variable not found
 						if (opVar == NULL) {
 							break;
@@ -148,7 +216,7 @@ int main() {
 							element_type = opVar->type;
 						}
 						break;
-
+					}
 					default:
 						// if we get here, we do not need to update an element value
 						write = 0;
@@ -156,8 +224,9 @@ int main() {
 				}
 				// update variable
 				if (write)
-					writeVariable(&dict, result->left_operand, element, element_type, NULL);
+					writeVariable(&dict, result->left_operand, element, element_type);
 				break;
+			}
 
 			case ADD_OP:
 				mathOp(&dict, result, ADD_OP);
@@ -182,6 +251,7 @@ int main() {
 		// printf("%s\n", input_buffer);
 	}
 
+	free(input_buffer);
 
 	return 0;
 }
@@ -305,7 +375,7 @@ void mathOp(DICT_t* dict, PARSE_RESULT_t* parse_result, OPTYPE_e op) {
 	}
 
 	// write variable
-	writeVariable(dict, parse_result->left_operand, result_element, result_type, NULL);
+	writeVariable(dict, parse_result->left_operand, result_element, result_type);
 	// print result to console
 	printVariable(dict, parse_result->left_operand);
 }

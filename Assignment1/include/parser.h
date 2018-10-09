@@ -24,7 +24,8 @@ typedef enum operand_type {
 	DOUBLE_OP,	// 3
 	STRING_OP,	// 4
 	LIST_OP,	// 5
-	VAR_OP		// 6 - dictionary variable
+	VAR_OP,		// 6 - dictionary variable
+	INDEX_OP
 } OPERAND_TYPE_e;
 
 //Result structure to hold operands and operation type
@@ -51,6 +52,7 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand);
 void printResult(PARSE_RESULT_t* result);
 
 // util
-char* removeQuotes(char* str);
+// char* removeQuotes(char* str);
+void removeQuotes(char* str);
 
 #endif // PARSER_H

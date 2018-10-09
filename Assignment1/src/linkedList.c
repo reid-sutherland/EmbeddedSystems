@@ -1,41 +1,11 @@
 #include "../include/linkedList.h"
 
-/*
-Print items based on their type
-*/
-void printItem(const GENERIC_LIST_ITEM_t *item){
-	switch (item->type) {
-		case CHAR:
-			// %c for char
-			printf("%c\n", item->element.c);
-			break;
-		case INT:
-			// %ld for signed long
-			printf("%li\n", item->element.i);
-			break;
-		case DOUBLE:
-			// %d for double
-			printf("%f\n", item->element.d);
-			break;
-		case STRING:
-			// %s for c-string format
-			printf("%s\n", item->element.s);
-			break;
-		case LIST:
-			// TODO
-			// printList(item->list, 0);
-			break;
-		default:
-			printf("Could not print - Unrecognized type\n");
-			break;
-	}
-}
 
 /*
 Add elements to list. Requires a type and an element. Creates dynamic memory
 to hold the GENERIC_LIST_ITEM_t structure
 */
-void addElement(GENERIC_LIST_t *list, ELEMENT_TYPE_e type, ELEMENT_t element){
+void addElement(GENERIC_LIST_t *list, ELEMENT_t element, ELEMENT_TYPE_e type) {
 	// create list item object, allocate memory, assign values
 	GENERIC_LIST_ITEM_t* item = calloc(1, sizeof(GENERIC_LIST_ITEM_t));
 	item->element = element;
@@ -145,25 +115,55 @@ ELEMENT_t getElement(GENERIC_LIST_t *list, int index) {
 }
 
 /*
+Print items based on their type
+*/
+void printItem(const GENERIC_LIST_ITEM_t *item) {
+	switch (item->type) {
+		case CHAR:
+			// %c for char
+			printf("\'%c\'", item->element.c);
+			break;
+		case INT:
+			// %ld for signed long
+			printf("%li", item->element.i);
+			break;
+		case DOUBLE:
+			// %d for double
+			printf("%.5f", item->element.d);
+			break;
+		case STRING:
+			// %s for c-string format
+			printf("\"%s\"", item->element.s);
+			break;
+		case LIST:
+			// print embedded list
+			printList(item->element.l, 0);
+			break;
+		default:
+			printf("Could not print - Unrecognized type\n");
+			break;
+	}
+}
+
+/*
 Print the list in sequence
 
 topList should be 1 if this is the top level list (it is not a member of another list)
 0 otherwise
 */
 void printList(const GENERIC_LIST_t *list, int topList) {
-	// if list is empty, error, do nothing
+	// print empty list and return
 	if (list->size == 0) {
-		printf("[]");
+		printf("[]\n");
 		return;
 	}
 	// assign head of list to item
 	GENERIC_LIST_ITEM_t* item = list->head;
 
-	int i = 0;
 	printf("[");
 	// loop until last element
 	while (1) {
-		// print item
+		// print item without newlines
 		printItem(item);
 
 		if (item->next != NULL) {
@@ -179,6 +179,5 @@ void printList(const GENERIC_LIST_t *list, int topList) {
 			printf("]");
 			break;
 		}
-		i++;
 	}
 }
