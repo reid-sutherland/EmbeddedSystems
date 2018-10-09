@@ -21,6 +21,10 @@ void printItem(const GENERIC_LIST_ITEM_t *item){
 			// %s for c-string format
 			printf("%s\n", item->element.s);
 			break;
+		case LIST:
+			// TODO
+			// printList(item->list, 0);
+			break;
 		default:
 			printf("Could not print - Unrecognized type\n");
 			break;
@@ -142,17 +146,21 @@ ELEMENT_t getElement(GENERIC_LIST_t *list, int index) {
 
 /*
 Print the list in sequence
+
+topList should be 1 if this is the top level list (it is not a member of another list)
+0 otherwise
 */
-void printList(const GENERIC_LIST_t *list){
+void printList(const GENERIC_LIST_t *list, int topList) {
 	// if list is empty, error, do nothing
 	if (list->size == 0) {
-		printf("Error: List is empty, nothing to print.\n");
+		printf("[]");
 		return;
 	}
 	// assign head of list to item
 	GENERIC_LIST_ITEM_t* item = list->head;
 
 	int i = 0;
+	printf("[");
 	// loop until last element
 	while (1) {
 		// print item
@@ -161,9 +169,14 @@ void printList(const GENERIC_LIST_t *list){
 		if (item->next != NULL) {
 			// iterate the pointer
 			item = item->next;
+			printf(", ");
+		}
+		else if (topList) {
+			printf("]\n");
+			break;
 		}
 		else {
-			printf("\n");
+			printf("]");
 			break;
 		}
 		i++;

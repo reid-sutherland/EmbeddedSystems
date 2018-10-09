@@ -14,7 +14,7 @@ typedef union element{
 	signed long int i;
 	double d;
 	char *s;
-	// struct generic_list *l;
+	struct generic_list *l;
 } ELEMENT_t;
 
 //Use this enum type to specify which element type is being used

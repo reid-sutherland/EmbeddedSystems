@@ -3,14 +3,13 @@
 
 #include <ctype.h>		// isdigit
 #include "types.h"
-#include "varList.h"
+#include "linkedList.h"
 
 // variable that holds variable name, and element with type and value
 typedef struct dictionary_variable{
 	char* varname;
 	ELEMENT_t element;
 	ELEMENT_TYPE_e type;
-	struct var_list* list;
 	struct dictionary_variable* next;
 } DICT_VAR_t;
 
@@ -35,11 +34,11 @@ int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_
 void removeVariable(DICT_t *dict, const char *varname);
 void printVariable(DICT_t *dict, const char *varname);
 
-DICT_VAR_t* newListVar(char *varname, GENERIC_LIST_t* list);
-void removeList(DICT_t *dict, const char *varname);
-DICT_VAR_t* readListVar(DICT_t *dict, const char *varname, int index);
-int writeListVar(DICT_t *dict, const char *varname, int index);
-void removeListVar(DICT_t *dict, const char *varname, int index);
+// DICT_VAR_t* newListVar(char *varname, GENERIC_LIST_t* list);
+// void removeList(DICT_t *dict, const char *varname);
+// DICT_VAR_t* readListVar(DICT_t *dict, const char *varname, int index);
+// int writeListVar(DICT_t *dict, const char *varname, int index);
+// void removeListVar(DICT_t *dict, const char *varname, int index);
 
 
 #endif // DICTIONARY_H

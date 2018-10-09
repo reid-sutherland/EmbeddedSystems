@@ -261,38 +261,37 @@ void processParseResult(DICT_t* dict, PARSE_RESULT_t *result) {
 
 	// don't process (or assign) a null operand
 	if (result->right_operand1 != NULL) {
-		result->right_type1 = processOperand(dict, result->right_operand1);
-		if (result->right_type1 != ERROR_OP) {
-			printf("right_operand1 = %s\n", result->right_operand1);
-		}
+		int whichOper = 1;
+		processOperand(dict, result, result->right_operand1, whichOper);
 	}
 	if (result->right_operand2 != NULL) {
-		result->right_type2 = processOperand(dict, result->right_operand2);
-		if (result->right_type2 != ERROR_OP) {
-			printf("right_operand2 = %s\n", result->right_operand2);
-		}
+		int whichOper = 2;
+		processOperand(dict, result, result->right_operand2, whichOper);
 	}
 }
 
-OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
+void processOperand(DICT_t* dict, PARSE_RESULT_t* result, char* operand, int whichOper) {
 	// TODO improve error catching for improper inputs ()
+
+	// operand type
+	OPERAND_TYPE_e oper_type;
 
 	// check for char, string, and list
 	//  much be at least length 2
 	if (strlen(operand) > 1) {
-		// printf("$%s$\n", operand);
+		printf("$%s$\n", operand);
 		// char
 		if (operand[0] == '\'' && operand[strlen(operand)-1] == '\'') {
-			// printf("\'\'\'\n");
+			printf("\'\'\'\n");
 			// char operand ('a') should only be length 3
 			if (strlen(operand) <= 3) {
-				// printf("<= 3\n");
-				return CHAR_OP;
+				printf("<= 3\n");
+				oper_type = CHAR_OP;
 			}
 			else if (strlen(operand) > 3) {
 				printf("Syntax Error: char should be a single ASCII character\n");
 				printf("  -> %s\n", operand);
-				return ERROR_OP;
+				oper_type = ERROR_OP;
 			}
 			// TODO check for 'exam'ple'
 			// TODO optionally replace error with this if Nelson approves
@@ -303,7 +302,7 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
 		}
 		// string
 		else if (operand[0] == '\"' && operand[strlen(operand)-1] == '\"') {
-			return STRING_OP;
+			oper_type = STRING_OP;
 			// enforce 50 character string limit
 			if (strlen(operand) > 52) {	// 50 + "" = 52
 				// terminate 53rd char with null character
@@ -314,7 +313,7 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
 		}
 		// list
 		else if (operand[0] == '[' && operand[strlen(operand)-1] == ']') {
-			return LIST_OP;
+			oper_type = LIST_OP;
 		}
 	}
 
@@ -339,23 +338,23 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
 	// int
 	if (isInt) {
 		isDouble = 0;
-		return INT_OP;
+		oper_type = INT_OP;
 	}
 	// double
 	else if (isDouble) {
 		// too many decimals, throw error
 		if (decimalCount > 1) {
 			printf("Syntax error: Too many decimals in type double\n");
-			printf("  -> %s\n", operand);
-			return ERROR_OP;
+			printf("%s\n", operand);
+			oper_type = ERROR_OP;
 		} else if (decimalCount < 1) {
 			//TODO remove prints
 			// if we have a double with no decimals somehow, debug
 			printf("Programmer error: Somehow we have no decimals in type double, ");
 			printf("check processParseResult()\n");
-			return ERROR_OP;
+			oper_type = ERROR_OP;
 		} else {
-			return DOUBLE_OP;
+			oper_type = DOUBLE_OP;
 		}
 	}
 	// operand is either variable, or something else (not expected)
@@ -363,14 +362,21 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
 		// variable
 		DICT_VAR_t* var = findVariable(dict, operand);
 		if (var != NULL) {
-			return VAR_OP;
+			oper_type = VAR_OP;
 		}
 		// at this point, treat it as a variable typo
 		else {
 			printf("Operand Error: Unable to identify the operand/variable\n");
 			printf("  -> %s\n", operand);
-			return ERROR_OP;
+			oper_type = ERROR_OP;
 		}
+	}
+
+	// assign the oper_type to the appropriate struct value
+	if (whichOper == 1) {
+		result->right_type1 = oper_type;
+	} else if (whichOper == 2) {
+		result->right_type2 = oper_type;
 	}
 }
 

@@ -18,14 +18,12 @@ typedef enum optype{
 
 // Enum to hold operand types (OP stands for operand here)
 typedef enum operand_type {
-	// error bit
-	ERROR_OP,	// 0
-	// the rest are literal values
+	ERROR_OP,	// 0 - error bit
 	CHAR_OP,	// 1
 	INT_OP,		// 2
 	DOUBLE_OP,	// 3
 	STRING_OP,	// 4
-	LIST_OP,	// 5 - dictionary list variable
+	LIST_OP,	// 5
 	VAR_OP		// 6 - dictionary variable
 } OPERAND_TYPE_e;
 
@@ -49,7 +47,7 @@ typedef struct parse_result{
 // parse_string function
 PARSE_RESULT_t* parse_string(const char *input_buffer);
 void processParseResult(DICT_t* dict, PARSE_RESULT_t* result);
-void processOperand(DICT_t* dict, PARSE_RESULT_t* result, char* operand, int whichOper);
+OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand);
 void printResult(PARSE_RESULT_t* result);
 
 // util

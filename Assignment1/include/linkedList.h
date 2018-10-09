@@ -20,6 +20,6 @@ void printItem(const GENERIC_LIST_ITEM_t *item);
 void addElement(GENERIC_LIST_t *list, ELEMENT_TYPE_e type, ELEMENT_t element);
 void removeElement(GENERIC_LIST_t *list, int index);
 ELEMENT_t getElement(GENERIC_LIST_t *list, int index);
-void printList(const GENERIC_LIST_t *list);
+void printList(const GENERIC_LIST_t *list, int topList);
 
 #endif // LINKEDLIST_H

@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
-#include "../include/varList.h"
+#include "../include/linkedList.h"
 #include "../include/parser.h"
 
 // function headers
@@ -58,15 +58,13 @@ int main() {
 		}
 
 		// parse the input string
-		// parse_string assumes assignment if no operator is found, otherwise sets op to last op found
-		// parse_string grabs text up until " +-*/=", stores in left/right1/right2 (in order) each time
-		// right2 is null only if a third operand token is not found, function assumes there are at least 2 operands
 		PARSE_RESULT_t* result = parse_string(input_buffer);
+		// process the result to determine type of each operand, and errors if present
+		processParseResult(&dict, result);
 
 		// take action based result's optype
 		switch (result->optype) {
 			case APPEND_OP:
-				processParseResult(&dict, result);
 				if (result->left_operand != NULL) {
 
 				}
@@ -87,11 +85,6 @@ int main() {
 				break;
 
 			case ASSIGN_OP:
-				// process the operands if it is not a print or append statement
-				processParseResult(&dict, result);
-				// debug
-				// printResult(result);
-
 				// only one operand
 				if (result->right_operand1 == NULL) {
 					// print the left operand variable if it exists
@@ -108,7 +101,6 @@ int main() {
 				// parse the operand to be assigned
 				// variables
 				DICT_VAR_t* opVar;
-				const char* varname = result->left_operand;
 				ELEMENT_t element;
 				ELEMENT_TYPE_e element_type;
 				char* c = result->right_operand1;
@@ -117,8 +109,13 @@ int main() {
 				int write = 1;
 				switch (result->right_type1) {
 					case CHAR_OP:
-						// index 1 should be the char between ''
-						element.c = c[1];
+						// if empty char, set c to null
+						if (strlen(c) == 2) {
+							element.c = NULL;
+						} else {
+							// index 1 should be the char between ''
+							element.c = c[1];
+						}
 						element_type = CHAR;
 						break;
 
@@ -133,7 +130,7 @@ int main() {
 						break;
 
 					case STRING_OP:
-						element.s = removeQuotes(result->right_operand1);
+						element.s = result->right_operand1;
 						element_type = STRING;
 						break;
 
@@ -163,46 +160,22 @@ int main() {
 				break;
 
 			case ADD_OP:
-				// TODO OPTIONAL: change the parse result process to handle two operand math (i.e. "1 + 2" print)
-				// process the operands if it is not a print or append statement
-				processParseResult(&dict, result);
-				// debug
-				// printResult(result);
-
 				mathOp(&dict, result, ADD_OP);
 				break;
 
 			case SUB_OP:
-				// process the operands if it is not a print or append statement
-				processParseResult(&dict, result);
-				// debug
-				// printResult(result);
-
 				mathOp(&dict, result, SUB_OP);
 				break;
 
 			case MULT_OP:
-				// process the operands if it is not a print or append statement
-				processParseResult(&dict, result);
-				// debug
-				// printResult(result);
-
 				mathOp(&dict, result, MULT_OP);
 				break;
 
 			case DIV_OP:
-				// process the operands if it is not a print or append statement
-				processParseResult(&dict, result);
-				// debug
-				// printResult(result);
-
 				mathOp(&dict, result, DIV_OP);
 				break;
 
 			default:
-				// TODO remove this
-				printf("Error: reached default of optype switch statement\n");
-				printf("main()\n");
 				break;
 		}
 
