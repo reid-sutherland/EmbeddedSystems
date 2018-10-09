@@ -98,7 +98,7 @@ Add a variable to the dictionary.
 Returns 1 if write was successful
 returns 0 or -1 otherwise
 */
-int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_TYPE_e element_type) {
+int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_TYPE_e element_type, GENERIC_LIST_t* list) {
 
 	// check if variable exists
 	DICT_VAR_t* old = findVariable(dict, varname);
@@ -122,7 +122,7 @@ int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_
 				old->element.s = element.s;
 				break;
 			case LIST:
-				// TODO: list case
+				old->list = list;
 				break;
 			default:
 				break;
@@ -131,8 +131,12 @@ int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_
 	}
 	// variable does not exist, create new
 	else {
-		// create new Var
-		DICT_VAR_t* var = newVariable(varname, element, element_type);
+		DICT_VAR_t* var;
+		if (element_type == LIST) {
+			var = newListVar(varname, list);
+		} else {
+			var = newVariable(varname, element, element_type);
+		}
 		// if error in new Variable, var is null, stop
 		if (var == NULL) {
 			return 0;
@@ -195,7 +199,9 @@ int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_
 				if (strcmp(test->element.s, element.s))
 					return 1;
 				break;
-			// TODO add list
+			case LIST:
+				return 1;
+				break;
 			default:
 				//TODO remove this
 				printf("test switch case reached default\n");
@@ -248,8 +254,8 @@ void printVariable(DICT_t *dict, const char *varname) {
 			// %s for c-string format
 			printf("%s\n", var->element.s);
 			break;
-		// TODO List
-		// case LIST:
+		case LIST:
+			printList(var->list, 1);
 		default:
 			printf("Could not print - Unrecognized type\n");
 			break;
@@ -261,27 +267,57 @@ void printVariable(DICT_t *dict, const char *varname) {
 // **********************************
 //         LIST FUNCTIONS
 // **********************************
-DICT_LIST_t* newList(char *listname, ELEMENT_t element, ELEMENT_TYPE_e type) {
+DICT_VAR_t* newListVar(char *varname, GENERIC_LIST_t* list) {
+	// automatically shorten a variable name to 15 chars
+	if (strlen(varname) > 15) {
+		varname[15] = '\0';
+	}
+	// first character must be alpha...
+	if (!isalpha(varname[0])) {
+		printf("Syntax Error: Variable names must start with an alphabetic character\n");
+		printf("  -> %s\n", varname);
+		return NULL;
+	}
+	// ... and the rest must be alphanumeric
+	int i = 0;
+	while (varname[i] != '\0') {
+		if (!isalnum(varname[i])) {
+			printf("Syntax Error: Variable names must be alphanumeric\n");
+			printf("  -> %s\n", varname);
+			return NULL;
+		}
+		i++;
+	}
+
+	// create variable object, allocate memory and init
+	DICT_VAR_t* newVar = calloc(1, sizeof(DICT_VAR_t));
+	newVar->varname = varname;
+	newVar->type = LIST;
+	newVar->next = NULL;
+	newVar->list = calloc(1, sizeof(GENERIC_LIST_t));
+	if (list == NULL) {
+		newVar->list->head = NULL;
+		newVar->list->size = 0;
+	}
+	else {
+
+	}
+
+	return newVar;
+}
+
+
+void removeList(DICT_t *dict, const char *varname) {
 
 }
 
 
-DICT_LIST_t* findList(DICT_t *dict, const char *listname);
+DICT_VAR_t* readListVar(DICT_t *dict, const char *varname, int index) {
+
+}
 
 
-DICT_LIST_t* readList(DICT_t *dict, const char *listname);
+int writeListVar(DICT_t *dict, const char *varname, int index);
 
 
-int writeList(DICT_t *dict, const char *listname, ELEMENT_t element, ELEMENT_TYPE_e type);
-
-
-void removeList(DICT_t *dict, const char *listname);
-
-
-DICT_VAR_t* readListVar(DICT_t *dict, const char *listname, int index);
-
-
-int writeListVar(DICT_t *dict, const char *listname, int index);
-
-
-void removeListVar(DICT_t *dict, const char *listname, int index);
+void removeListVar(DICT_t *dict, const char *varname, int index);

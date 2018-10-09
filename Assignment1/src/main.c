@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
-#include "../include/linkedList.h"
+#include "../include/varList.h"
 #include "../include/parser.h"
 
 // function headers
@@ -66,6 +66,15 @@ int main() {
 		// take action based result's optype
 		switch (result->optype) {
 			case APPEND_OP:
+				processParseResult(&dict, result);
+				if (result->left_operand != NULL) {
+
+				}
+				// error
+				if (result->right_operand1 == NULL || result->right_type1 == ERROR_OP) {
+					printf("Syntax Error: Nothing to append\n");
+					break;
+				}
 				break;
 
 			case PRINT_OP:
@@ -128,7 +137,9 @@ int main() {
 						element_type = STRING;
 						break;
 
-					// TODO list
+					// case LIST_OP:
+					//
+					// 	element_type = LIST;
 
 					case VAR_OP:
 						opVar = readVariable(&dict, result->right_operand1);
@@ -148,7 +159,7 @@ int main() {
 				}
 				// update variable
 				if (write)
-					writeVariable(&dict, result->left_operand, element, element_type);
+					writeVariable(&dict, result->left_operand, element, element_type, NULL);
 				break;
 
 			case ADD_OP:
@@ -321,7 +332,7 @@ void mathOp(DICT_t* dict, PARSE_RESULT_t* parse_result, OPTYPE_e op) {
 	}
 
 	// write variable
-	writeVariable(dict, parse_result->left_operand, result_element, result_type);
+	writeVariable(dict, parse_result->left_operand, result_element, result_type, NULL);
 	// print result to console
 	printVariable(dict, parse_result->left_operand);
 }

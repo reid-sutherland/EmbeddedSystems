@@ -1,26 +1,28 @@
-#include "../include/linkedList.h"
+#include "../include/varList.h"
 
 /*
 Print items based on their type
 */
 void printItem(const GENERIC_LIST_ITEM_t *item){
-//TODO TASK 5
 	switch (item->type) {
 		case CHAR:
 			// %c for char
-			printf("%c\n", item->element.c);
+			printf("%c", item->element.c);
 			break;
 		case INT:
 			// %ld for signed long
-			printf("%li\n", item->element.i);
+			printf("%li", item->element.i);
 			break;
 		case DOUBLE:
 			// %d for double
-			printf("%f\n", item->element.d);
+			printf("%f", item->element.d);
 			break;
 		case STRING:
 			// %s for c-string format
-			printf("%s\n", item->element.s);
+			printf("%s", item->element.s);
+			break;
+		case LIST:
+			printList(item->list, 0);
 			break;
 		default:
 			printf("Could not print - Unrecognized type\n");
@@ -32,8 +34,7 @@ void printItem(const GENERIC_LIST_ITEM_t *item){
 Add elements to list. Requires a type and an element. Creates dynamic memory
 to hold the GENERIC_LIST_ITEM_t structure
 */
-void addElement(GENERIC_LIST_t *list, ELEMENT_TYPE_e type, ELEMENT_t element){
-//TODO TASK 7
+void addElement(GENERIC_LIST_t *list, ELEMENT_t element, ELEMENT_TYPE_e type) {
 	// create list item object, allocate memory, assign values
 	GENERIC_LIST_ITEM_t* item = calloc(1, sizeof(GENERIC_LIST_ITEM_t));
 	item->element = element;
@@ -62,10 +63,35 @@ void addElement(GENERIC_LIST_t *list, ELEMENT_TYPE_e type, ELEMENT_t element){
 }
 
 /*
+Add a list to a list
+*/
+// void addList(GENERIC_LIST_t *list, GENERIC_LIST_t *listAdd) {
+// 	// create list object
+// 	GENERIC_LIST_ITEM_t* newListItem = calloc(1, sizeof(GENERIC_LIST_ITEM_t));
+// 	newListItem->type = LIST;
+//
+// 	GENERIC_LIST_t* newList = calloc(1, sizeof(GENERIC_LIST_t));
+//
+//
+// 	if (list->size == 0) {
+// 		list->head = newListItem;
+// 		list->size = 1;
+// 	}
+// 	else {
+// 		GENERIC_LIST_ITEM_t* current;
+// 		current = list->head;
+// 		while (current->next != NULL) {
+// 			current = current->next;
+// 		}
+// 		current->next = newListItem;
+// 		list->size += 1;
+// 	}
+// }
+
+/*
 Remove item from list at given index
 */
 void removeElement(GENERIC_LIST_t *list,int index){
-//TODO TASK 8
 	// do nothing if out of bounds
 	if (index >= list->size) {
 		printf("Error: Index out of bounds, nothing to remove.\n");
@@ -121,19 +147,41 @@ void removeElement(GENERIC_LIST_t *list,int index){
 }
 
 /*
-Print the list in sequence
+Get an item from a list
 */
-void printList(const GENERIC_LIST_t *list){
-//TODO TASK 9
+GENERIC_LIST_ITEM_t* getListItem(GENERIC_LIST_t *list, int index) {
+	// do nothing if out of bounds
+	if (index >= list->size) {
+		printf("Error: Index out of bounds.\n");
+		return NULL;
+	}
+
+	GENERIC_LIST_ITEM_t* current = list->head;
+	// loop to the item with the specified index
+	for (int i = 0; i < index; i++) {
+		// check null
+		if (current->next != NULL) {
+			current = current->next;
+		}
+	}
+	return current;
+}
+
+/*
+Print the list in sequence
+topList should be 1 if this is the top level list (it is not a member of another list)
+*/
+void printList(const GENERIC_LIST_t *list, int topList){
 	// if list is empty, error, do nothing
 	if (list->size == 0) {
-		printf("Error: List is empty, nothing to print.\n");
+		printf("[]");
 		return;
 	}
 	// assign head of list to item
 	GENERIC_LIST_ITEM_t* item = list->head;
 
 	int i = 0;
+	printf("[");
 	// loop until last element
 	while (1) {
 		// print item
@@ -142,9 +190,14 @@ void printList(const GENERIC_LIST_t *list){
 		if (item->next != NULL) {
 			// iterate the pointer
 			item = item->next;
+			printf(", ");
+		}
+		else if (topList) {
+			printf("]\n");
+			break;
 		}
 		else {
-			printf("\n");
+			printf("]");
 			break;
 		}
 		i++;

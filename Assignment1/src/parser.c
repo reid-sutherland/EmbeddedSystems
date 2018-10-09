@@ -36,15 +36,22 @@ PARSE_RESULT_t* parse_string(const char* input_buffer){
     else if(strncmp(command,APPEND_COMMAND,7)==0){
         //Set optype to APPEND_OP
         result->optype = APPEND_OP;
-        //Ignore first token (says print)
+        //Ignore first token (says append)
         strtok_r(rest, "()", &rest);
         //Make a string in dynamic memory to hold the variable operand
         char* operand = calloc(MAX_OPERAND_LEN,sizeof(char));
-        token = strtok_r(rest, "()", &rest);
-        //Copy the token onto the operand
-        strcpy(operand,token);
-        //Set the operand to the left operand field
-        result->left_operand = operand;
+        token = strtok_r(rest, ", ", &rest);
+		strcpy(operand,token);
+		// modify left operand
+		result->left_operand = operand;
+		token = strtok_r(rest, "()", &rest);
+		if (token != NULL) {
+			operand = calloc(MAX_OPERAND_LEN, sizeof(char));
+			strcpy(operand, token);
+			result->right_operand1 = operand;
+		} else {
+			result->right_operand1 = NULL;
+		}
         //Free the copied buffer
         free(command);
         return result;
@@ -214,16 +221,18 @@ void processOperand(DICT_t* dict, PARSE_RESULT_t* result, char* operand, int whi
 		}
 	}
 
-	// operand is either variable, list, or something else (not expected)
+	// list
+	else if (operand[0] == '[' && operand[strlen(operand)-1] == ']') {
+		oper_type = LIST_OP;
+	}
+
+	// operand is either variable, or something else (not expected)
 	else {
 		// variable
 		DICT_VAR_t* var = findVariable(dict, operand);
 		if (var != NULL) {
 			oper_type = VAR_OP;
 		}
-
-		// TODO add list
-
 		// at this point, treat it as a variable typo
 		else {
 			printf("Operand Error: Unable to identify the operand/variable\n");
