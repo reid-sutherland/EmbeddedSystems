@@ -92,13 +92,13 @@ void removeElement(GENERIC_LIST_t *list,int index){
 }
 
 /*
-Get an element from a list
+Get a list item from the list
 */
-ELEMENT_t getElement(GENERIC_LIST_t *list, int index) {
+GENERIC_LIST_ITEM_t* getItem(GENERIC_LIST_t *list, int index) {
 	// do nothing if out of bounds
 	if (index >= list->size) {
 		printf("Error: Index out of bounds.\n");
-		return;
+		return NULL;
 	}
 
 	GENERIC_LIST_ITEM_t* current = list->head;
@@ -111,7 +111,7 @@ ELEMENT_t getElement(GENERIC_LIST_t *list, int index) {
 		}
 	}
 
-	return current->element;
+	return current;
 }
 
 /*

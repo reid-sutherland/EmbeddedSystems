@@ -27,11 +27,5 @@ int writeVariable(DICT_t *dict, const char *varname, ELEMENT_t element, ELEMENT_
 void removeVariable(DICT_t *dict, const char *varname);
 void printVariable(DICT_t *dict, const char *varname);
 
-// DICT_VAR_t* newListVar(char *varname, GENERIC_LIST_t* list);
-// void removeList(DICT_t *dict, const char *varname);
-// DICT_VAR_t* readListVar(DICT_t *dict, const char *varname, int index);
-// int writeListVar(DICT_t *dict, const char *varname, int index);
-// void removeListVar(DICT_t *dict, const char *varname, int index);
-
 
 #endif // DICTIONARY_H

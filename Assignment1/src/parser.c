@@ -258,8 +258,6 @@ Returns 0 if errors (parse result should be discarded elsewhere)
   (i.e. right operand is null)
 */
 void processParseResult(DICT_t* dict, PARSE_RESULT_t *result) {
-
-	// don't process (or assign) a null operand
 	if (result->right_operand1 != NULL) {
 		result->right_type1 = processOperand(dict, result->right_operand1);
 	}
@@ -324,11 +322,75 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
 			}
 		}
 		// INDEX
-		else if (strchr(operand, '[') != NULL && strchr(operand, ']') != NULL) {
+		else if (operand[0] != '[' && strchr(operand, '[') != NULL && strchr(operand, ']') != NULL) {
 			// parsing the index symbol will have to be done elsewhere
 			// for now just make sure its valid and return if valid
-			
-			return INDEX_OP;
+
+			// should only be one of each bracket
+			int i = 0, leftCount = 0, rightCount = 0;
+			while (operand[i] != '\0') {
+				if (operand[i] == '[') {
+					leftCount++;
+				} else if (operand[i] == ']') {
+					rightCount++;
+				}
+				// right bracket came first, error
+				if (rightCount > leftCount) {
+					printf("  -> %s\n\n", operand);
+					printf("Syntax Error: Brackets out of order\n");
+					return ERROR_OP;
+				}
+				i++;
+			}
+			if (leftCount != 1 || rightCount != 1) {
+				printf("  -> %s\n\n", operand);
+				printf("Syntax Error: Too many/too few brackets\n");
+				return ERROR_OP;
+			}
+			else {
+				// pointer for parsing
+				char* pch;
+				// get variable name
+				pch = strtok(operand, "[");
+				// make sure variable exists and is a list
+				DICT_VAR_t* var = readVariable(dict, pch);
+				if (var != NULL) {
+					// not a list
+					if (var->type != LIST) {
+						printf("  -> %s\n\n", operand);
+						printf("Syntax Error: Variable %s is not a list\n", var->varname);
+						return ERROR_OP;
+					}
+				}
+				// does not exist
+				else {
+					printf("  -> %s\n\n", operand);
+					printf("Error: Variable not found in dictionary\n");
+					return ERROR_OP;
+				}
+				// check that index is int
+				pch = strtok(NULL, "]");
+				char* pch_iter = pch;
+				while (pch_iter != '\0' && (int) *pch_iter != 0) {
+					if (!isdigit(*pch_iter)) {
+						printf("  -> %s\n\n", operand);
+						printf("Syntax Error: Non-integer in index\n");
+						return ERROR_OP;
+					}
+					pch_iter++;
+				}
+
+				// check that the index is inbounds
+				int index = atoi(pch);
+				GENERIC_LIST_t* list = var->element.l;
+				if (index > list->size - 1) {
+					printf("  -> [%i]\n\n", list->size);
+					printf("Out of Bounds Error: Index is larger than size of list\n");
+					return ERROR_OP;
+				}
+
+				return INDEX_OP;
+			}
 		}
 	}
 
@@ -391,6 +453,97 @@ OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand) {
 	return ERROR_OP;
 }
 
+int processListIndex(DICT_t* dict, char* operand, int silence) {
+	// TODO improve error catching for improper inputs ()
+
+	// check for char, string, and list
+	//  much be at least length 2
+	if (strlen(operand) > 1) {
+		// INDEX
+		if (strchr(operand, '[') != NULL && strchr(operand, ']') != NULL) {
+			// parsing the index symbol will have to be done elsewhere
+			// for now just make sure its valid and return if valid
+			// should only be one of each bracket
+			int i = 0, leftCount = 0, rightCount = 0;
+			while (operand[i] != '\0') {
+				if (operand[i] == '[') {
+					leftCount++;
+				} else if (operand[i] == ']') {
+					rightCount++;
+				}
+				// right bracket came first, error
+				if (rightCount > leftCount) {
+					if (silence == 0) {
+						printf("  -> %s\n\n", operand);
+						printf("Syntax Error: Brackets are out of order\n");
+					}
+					return -1;
+				}
+				i++;
+			}
+			if (leftCount != 1 || rightCount != 1) {
+				if (silence == 0) {
+					printf("  -> %s\n\n", operand);
+					printf("Syntax Error: Too many/too few brackets\n");
+				}
+				return -1;
+			}
+			else {
+				// pointer for parsing
+				char* pch;
+				// get variable name
+				pch = strtok(operand, "[");
+				// make sure variable exists and is a list
+				DICT_VAR_t* var = readVariable(dict, pch);
+				if (var != NULL) {
+					// not a list
+					if (var->type != LIST) {
+						if (silence == 0) {
+							printf("  -> %s\n\n", operand);
+							printf("Syntax Error: Variable %s is not a list\n", var->varname);
+						}
+						return -1;
+					}
+				}
+				// does not exist
+				else {
+					if (silence == 0) {
+						printf("  -> %s\n\n", operand);
+						printf("Error: Variable not found in dictionary\n");
+					}
+					return -1;
+				}
+				// check that index is int
+				pch = strtok(NULL, "]");
+				char* pch_iter = pch;
+				while (pch_iter != '\0' && (int) *pch_iter != 0) {
+					if (!isdigit(*pch_iter)) {
+						if (silence == 0) {
+							printf("  -> %s\n\n", operand);
+							printf("Syntax Error: Non-integer in index\n");
+						}
+						return -1;
+					}
+					pch_iter++;
+				}
+
+				// check that the index is inbounds
+				int index = atoi(pch);
+				GENERIC_LIST_t* list = var->element.l;
+				if (index > list->size - 1) {
+					if (silence == 0) {
+						printf("  -> [%i]\n\n", list->size);
+						printf("Out of Bounds Error: Index is larger than size of list\n");
+					}
+					return -1;
+				}
+				return index;
+			}
+		}
+	}
+	return -1;
+}
+
 
 /*
 Print the parse result
@@ -411,18 +564,6 @@ void printResult(PARSE_RESULT_t *result) {
 	printf("\n");
 }
 
-
-// char* removeQuotes(char* str) {
-// 	char* newStr = (char*) calloc(strlen(str), sizeof(char));
-//
-// 	for (int i = 1; i < strlen(str) - 1; i++) {
-// 		newStr[i-1] = str[i];
-// 	}
-// 	newStr[strlen(str) - 1] = '\0';
-//
-// 	return newStr;
-// }
-
 /*
 Remove the quotations from the outside of the char buffer
 */
@@ -434,10 +575,13 @@ void removeQuotes(char* str) {
 		str[i-1] = newStr[i];
 	}
 	str[strlen(newStr)-2] = '\0';
+	free(newStr);
 }
 
 /*
-Checks for bracket operator syntax
-i.e mylist[3]
+Gets index from a list index char*
+i.e. list[1]
 */
-int parseBrackets()
+int parseIndex() {
+	return 0;
+}

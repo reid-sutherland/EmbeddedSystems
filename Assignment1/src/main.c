@@ -86,7 +86,7 @@ int main() {
 				DICT_VAR_t* var = readVariable(&dict, result->left_operand);
 				ELEMENT_t element;
 				ELEMENT_TYPE_e element_type;
-				if (var != NULL) {
+				if (var != NULL && var->type == LIST) {
 
 					switch (result->right_type1) {
 						case CHAR_OP: {
@@ -134,6 +134,11 @@ int main() {
 					}
 					// append the element to the list
 					addElement(var->element.l, element, element_type);
+				}
+				else {
+					printf("  -> %s\n\n", var->varname);
+					printf("Append Error: Variable was not a list or not found in dictionary\n");
+					break;
 				}
 
 				break;
@@ -210,10 +215,37 @@ int main() {
 						DICT_VAR_t* opVar = readVariable(&dict, result->right_operand1);
 						// break if variable not found
 						if (opVar == NULL) {
+							write = 0;
 							break;
 						} else {
 							element = opVar->element;
 							element_type = opVar->type;
+						}
+						break;
+					}
+					case INDEX_OP: {
+						int index = processListIndex(&dict, result->right_operand1, 0);
+						if (index == -1) {
+							write = 0;
+							break;
+						}
+						else {
+							// pointer for parsing
+							char* pch;
+							// get variable name
+							pch = strtok(result->right_operand1, "[");
+							// get variable from name
+							DICT_VAR_t* var = readVariable(&dict, pch);
+							if (var == NULL) {
+								break;
+							}
+							if (var->type != LIST) {
+								printf("  -> %s\n\n", result->right_operand1);
+								printf("Assign Error: Cannot access index of a non-list variable\n");
+							}
+							GENERIC_LIST_ITEM_t* item = getItem(var->element.l, index);
+							element = item->element;
+							element_type = item->type;
 						}
 						break;
 					}
@@ -223,8 +255,33 @@ int main() {
 						break;
 				}
 				// update variable
-				if (write)
-					writeVariable(&dict, result->left_operand, element, element_type);
+				if (write) {
+					// check if left operand is a list
+					int index = processListIndex(&dict, result->left_operand, 1);
+					// not a list
+					if (index == -1) {
+						writeVariable(&dict, result->left_operand, element, element_type);
+					}
+					// is a list
+					else {
+						// pointer for parsing
+						char* pch;
+						// get variable name
+						pch = strtok(result->left_operand, "[");
+						// get variable from name
+						DICT_VAR_t* var = readVariable(&dict, pch);
+						if (var == NULL) {
+							break;
+						}
+						if (var->type != LIST) {
+							printf("  -> %s\n\n", result->left_operand);
+							printf("Assign Error: Cannot access index of a non-list variable\n");
+						}
+						GENERIC_LIST_ITEM_t* item = getItem(var->element.l, index);
+						item->element = element;
+						item->type = element_type;
+					}
+				}
 				break;
 			}
 
@@ -250,8 +307,6 @@ int main() {
 
 		// printf("%s\n", input_buffer);
 	}
-
-	free(input_buffer);
 
 	return 0;
 }

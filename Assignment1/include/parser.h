@@ -49,10 +49,12 @@ typedef struct parse_result{
 PARSE_RESULT_t* parse_string(const char *input_buffer);
 void processParseResult(DICT_t* dict, PARSE_RESULT_t* result);
 OPERAND_TYPE_e processOperand(DICT_t* dict, char* operand);
+int processListIndex(DICT_t* dict, char* operand, int silence);
 void printResult(PARSE_RESULT_t* result);
 
 // util
 // char* removeQuotes(char* str);
 void removeQuotes(char* str);
+int parseIndex();
 
 #endif // PARSER_H
