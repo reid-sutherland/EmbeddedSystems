@@ -1,11 +1,6 @@
-#include "rims.h"
 #include "global.h"
 
 // Variables for main here
-
-int coinCount = 0;
-int wait = 0;
-
 
 enum SM1_States { SM1_init, SM1_coinIn, SM1_waitRise, SM1_waitChoice, SM1_choice, SM1_dispense } SM1_State;
 
