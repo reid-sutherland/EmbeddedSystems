@@ -1,5 +1,4 @@
-#include "global.h"		// global also includes rims.h
-#include "secret_code.h"
+#include "global.h"		// global also includes rims.h and secret_code.h
 #include "debounce.h"
 #include "waitFlash.h"
 #include "gameOverFlash.h"
@@ -12,25 +11,28 @@
 //  revert to RIBS' implementation for managing concurrent states
 // TODO: specify active high/low button functionality in report!!
 
+// Task Struct
 typedef struct task {
    int state;
    unsigned long period;
    unsigned long elapsedTime;
    int (*TickFct)(int);
 } task;
-
+// Tasks Array
 task tasks[4];
-
+// Periods
 const unsigned char tasksNum = 4;
 const unsigned long Debounce_Period = 20;
 const unsigned long WaitFlash_Period = 50;
 const unsigned long GameOverFlash_Period = 50;
 const unsigned long Game_Period = 100;
-
+// Period GCD
 const unsigned long tasksPeriodGCD = 10;
-
 // Tick Function Declarations
 int TickFunc_Game(int p_state);
+
+// Secret Code variable
+const int secret_code = SECRET_CODE;
 
 unsigned char processingRdyTasks = 0;
 void TimerISR() {
@@ -88,10 +90,11 @@ int main() {
 int TickFunc_Game(int p_state) {
 	// SM Variables
 	static enum States { G_newGame,  } state;
-	static int newFlashCount;
-	static int waitTimer;
+	static int secret_code = SECRET_CODE;
+	static int newFlashCount;		// counts the flashes that signal new game
+	static int waitTimer;			// timer for waiting after guesses
 
-	state = p_state
+	state = p_state;
 
 
 

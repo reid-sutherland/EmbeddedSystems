@@ -12,16 +12,16 @@ int TickFunc_WaitFlash(int p_state) {
 			state = WF_S0;
 			break;
 		case WF_S0:
-			if (wait_flash_enable) {
+			if (WF_enable) {
 				B = 0;
 				state = WF_S1;
 			}
-			else if (!wait_flash_enable) {
+			else if (!WF_enable) {
 				state = WF_S0;
 			}
 			break;
 		case WF_S1:
-			if (!wait_flash_enable) {
+			if (!WF_enable) {
 				B = 0;
 				state = WF_S0;
 			}
@@ -31,7 +31,7 @@ int TickFunc_WaitFlash(int p_state) {
 			}
 			break;
 		case WF_S2:
-			if (!wait_flash_enable) {
+			if (!WF_enable) {
 				B = 0;
 				state = WF_S0;
 			}
@@ -41,7 +41,7 @@ int TickFunc_WaitFlash(int p_state) {
 			}
 			break;
 		case WF_S3:
-			if (!wait_flash_enable) {
+			if (!WF_enable) {
 				B = 0;
 				state = WF_S0;
 			}
@@ -51,7 +51,7 @@ int TickFunc_WaitFlash(int p_state) {
 			}
 			break;
 		case WF_S4:
-			if (!wait_flash_enable) {
+			if (!WF_enable) {
 				B = 0;
 				state = WF_S0;
 			}
@@ -61,7 +61,7 @@ int TickFunc_WaitFlash(int p_state) {
 			}
 			break;
 		case WF_S5:
-			if (!wait_flash_enable) {
+			if (!WF_enable) {
 				B = 0;
 				state = WF_S0;
 			}
@@ -71,7 +71,7 @@ int TickFunc_WaitFlash(int p_state) {
 			}
 			break;
 		case WF_S6:
-			if (!wait_flash_enable) {
+			if (!WF_enable) {
 				B = 0;
 				state = WF_S0;
 			}
@@ -80,7 +80,7 @@ int TickFunc_WaitFlash(int p_state) {
 				state = WF_S7
 			}
 		case WF_S7:
-			if (!wait_flash_enable) {
+			if (!WF_enable) {
 				B = 0;
 				state = WF_S0;
 			}
@@ -90,7 +90,7 @@ int TickFunc_WaitFlash(int p_state) {
 			}
 			break;
 		case WF_S8:
-			if (!wait_flash_enable) {
+			if (!WF_enable) {
 				B = 0;
 				state = WF_S0;
 			}

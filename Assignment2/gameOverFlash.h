@@ -14,10 +14,10 @@ int TickFunc_GameOverFlash(int p_state) {
 			state = GOF_idle;
 			break;
 		case GOF_idle:
-			if (!game_over_flash_enable) {
+			if (!GOF_enable) {
 				state = GOF_idle;
 			}
-			else if (game_over_flash_enable) {
+			else if (GOF_enable) {
 				B = 0;
 				flashCount = 0;
 				state = GOF_flashOn;
@@ -35,7 +35,7 @@ int TickFunc_GameOverFlash(int p_state) {
 				state = GOF_waitOff;
 			}
 			else if (flasCount >= 5) {
-				game_over_flash_enable = 0;
+				GOF_enable = 0;
 				state = GOF_idle;
 			}
 			break;
