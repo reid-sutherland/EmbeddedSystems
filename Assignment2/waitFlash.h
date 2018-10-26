@@ -1,5 +1,4 @@
 #include "global.h"
-#include "rims.h"
 
 
 int TickFunc_WaitFlash(int p_state) {

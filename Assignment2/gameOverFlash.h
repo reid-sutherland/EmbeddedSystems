@@ -1,5 +1,4 @@
 #include "global.h"
-#include "rims.h"
 
 
 int TickFunc_GameOverFlash(int p_state) {

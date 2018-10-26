@@ -1,4 +1,5 @@
-#include "global.h"
+#include "global.h"		// global also includes rims.h
+#include "secret_code.h"
 #include "debounce.h"
 #include "waitFlash.h"
 #include "gameOverFlash.h"
@@ -9,6 +10,7 @@
 
 // TODO: to myself - if errors, abandon my enum implementation and
 //  revert to RIBS' implementation for managing concurrent states
+// TODO: specify active high/low button functionality in report!!
 
 typedef struct task {
    int state;
@@ -33,7 +35,7 @@ int TickFunc_Game(int p_state);
 unsigned char processingRdyTasks = 0;
 void TimerISR() {
    unsigned char i;
-   if (processingRdyTasks) {
+   if (processingRdyTasks) {int
       printf("Period too short to complete tasks\n");
    }
    processingRdyTasks = 1;
@@ -84,7 +86,10 @@ int main() {
 
 
 int TickFunc_Game(int p_state) {
-	static enum States { } state;
+	// SM Variables
+	static enum States { G_newGame,  } state;
+	static int newFlashCount;
+	static int waitTimer;
 
 	state = p_state
 

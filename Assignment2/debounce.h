@@ -1,5 +1,4 @@
 #include "global.h"
-#include "rims.h"
 
 
 int TickFunc_Debounce(int p_state) {
