@@ -11,6 +11,7 @@ int TickFunc_GameOverFlash(int p_state) {
 	// Transitions
 	switch (state) {
 		case -1:
+			GOF_enable = 0;
 			state = GOF_idle;
 			break;
 		case GOF_idle:

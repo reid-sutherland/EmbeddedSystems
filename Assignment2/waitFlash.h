@@ -9,6 +9,7 @@ int TickFunc_WaitFlash(int p_state) {
 	// Transitions
 	switch(state) {
 		case -1:
+			WF_enable = 0;
 			state = WF_S0;
 			break;
 		case WF_S0:

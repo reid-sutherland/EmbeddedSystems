@@ -31,9 +31,6 @@ const unsigned long tasksPeriodGCD = 10;
 // Tick Function Declarations
 int TickFunc_Game(int p_state);
 
-// Secret Code variable
-const int secret_code = SECRET_CODE;
-
 unsigned char processingRdyTasks = 0;
 void TimerISR() {
    unsigned char i;
@@ -90,13 +87,12 @@ int main() {
 int TickFunc_Game(int p_state) {
 	// SM Variables
 	static enum States { G_newGame,  } state;
-	static int secret_code = SECRET_CODE;
 	static int newFlashCount;		// counts the flashes that signal new game
 	static int waitTimer;			// timer for waiting after guesses
 
 	state = p_state;
 
-
+	
 
 
 	return state;

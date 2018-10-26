@@ -4,12 +4,20 @@
 #include "rims.h"
 #include "secret_code.h"
 
-/* GLOBAL VARIABLES HERE */
-int secret_code = SECRET_CODE;		// THE secret code to be guessed
-int winCondition;		// high if game ends in win, low for lose
-int btnPressed;			// high when guess submission button is pressed
+/* Function Headers */
+int checkGuess();
+unsigned char getNumIncorrectBits();
+void resetD();
+int getD();
+void decrementD();
+unsigned char getBit(unsigned char x, unsigned char k);
 
-int WF_enable;	// enable the wait flash cycle on B
+/* GLOBAL VARIABLES HERE */
+unsigned char secret_code = (char) SECRET_CODE;		// THE secret code to be guessed
+int winCondition;		// high if game ends in win, low for lose
+int btnPressed;		// high when guess submission button is pressed
+
+int WF_enable;		// enable the wait flash cycle on B
 int GOF_enable;		// enable the game over flash pattern for end game
 
 
@@ -19,13 +27,28 @@ int GOF_enable;		// enable the game over flash pattern for end game
 // Returns 0 for incorrect, 1 for correct
 int checkGuess() {
 	if (A == secret_code) {
-
+		return 1;
 	}
+
+	// return lose if A does not match secret code
+	return 0;
 }
 
 // Returns the number of incorrect bits on A
-int getNumIncorrectBits() {
+// TODO: if this has problems, switch to XOR. Number of 1s in result of XOR should
+//  be the number of incorrect bits
+unsigned char getNumIncorrectBits() {
+	unsigned char num = 0;
 
+	// compute A XOR code
+	unsigned char xor_result = A ^ secret_code;
+	// count number of incorrect bits - each 1 is a mismatched bit
+	for (int i = 0; i < 8; i++) {
+		if (getBit(xor_result, i) == 1) {
+			num++;
+		}
+	}
+	return num;
 }
 
 // *** I am bad at pin math, so I am essentially taking some shortcuts to overcome
@@ -128,6 +151,11 @@ void decrementD() {
 	}
 
 	return;
+}
+
+// getBit function - borrowed from ZyBooks
+unsigned char getBit(unsigned char x, unsigned char k) {
+   return ((x & (0x01 << k)) != 0);
 }
 
 
