@@ -1,35 +1,130 @@
 #include "global.h"
+#include "debounce.h"
+#include "waitFlash.h"
+#include "gameOverFlash.h"
 
+// I was GOING to write all of this code from scratch, but since
+//  I'll be testing with RIMS, I suppose I need to follow their format to
+//  be safe.. Oh well!
 
-unsigned char WaitFlash_Clk;
-unsigned char GameOverFlash_Clk;
-unsigned char Debounce_Clk;
-unsigned char Game_Clk;
+// TODO: to myself - if errors, abandon my enum implementation and
+//  revert to RIBS' implementation for managing concurrent states
 
+typedef struct task {
+   int state;
+   unsigned long period;
+   unsigned long elapsedTime;
+   int (*TickFct)(int);
+} task;
 
-// Timer function
+task tasks[4];
+
+const unsigned char tasksNum = 4;
+const unsigned long Debounce_Period = 20;
+const unsigned long WaitFlash_Period = 50;
+const unsigned long GameOverFlash_Period = 50;
+const unsigned long Game_Period = 100;
+
+const unsigned long tasksPeriodGCD = 10;
+
+// Tick Function Declarations
+int TickFunc_Game(int p_state);
+
+unsigned char processingRdyTasks = 0;
 void TimerISR() {
-   SM1_Clk = 1;
+   unsigned char i;
+   if (processingRdyTasks) {
+      printf("Period too short to complete tasks\n");
+   }
+   processingRdyTasks = 1;
+   for (i = 0; i < tasksNum; ++i) { // Heart of scheduler code
+      if ( tasks[i].elapsedTime >= tasks[i].period ) { // Ready
+         tasks[i].state = tasks[i].TickFct(tasks[i].state);
+         tasks[i].elapsedTime = 0;
+      }
+      tasks[i].elapsedTime += tasksPeriodGCD;
+   }
+   processingRdyTasks = 0;
 }
-
 int main() {
+   // Priority assigned to lower position tasks in array
+   unsigned char i=0;
+   tasks[i].state = -1;
+   tasks[i].period = Debounce_Period;
+   tasks[i].elapsedTime = tasks[i].period;
+   tasks[i].TickFct = &TickFunc_Debounce;
 
-   const unsigned int WaitFlash_Period = 50;
-	 const unsigned int GameOverFlash_Period = 50;
-	 const unsigned int Debounce_Period = 20;
-	 const unsigned int Game_Period = 100;
+   ++i;
+   tasks[i].state = -1;
+   tasks[i].period = WaitFlash_Period;
+   tasks[i].elapsedTime = tasks[i].period;
+   tasks[i].TickFct = &TickFunc_WaitFlash;
 
-	 // Skip the math here, but should come out to a universal period of 10 ms
-	 const unsigned int Concurrent_Period = 10;
-   TimerSet(Concurrent_Period);
+   ++i;
+   tasks[i].state = -1;
+   tasks[i].period = GameOverFlash_Period;
+   tasks[i].elapsedTime = tasks[i].period;
+   tasks[i].TickFct = &TickFunc_GameOverFlash;
+
+   ++i;
+   tasks[i].state = -1;
+   tasks[i].period = Game_Period;
+   tasks[i].elapsedTime = tasks[i].period;
+   tasks[i].TickFct = &TickFunc_Game;
+
+   ++i;
+   TimerSet(tasksPeriodGCD);
    TimerOn();
 
-   SM1_State = -1; // Initial state
-   B = 0; // Init outputs
+   while(1) { Sleep(); }
 
-   while(1) {
-      TickFct_State_machine_1();
-      while(!SM1_Clk);
-      SM1_Clk = 0;
-   } // while (1)
-} // Main
+   return 0;
+}
+
+
+
+int TickFunc_Game(int p_state) {
+	static enum States { } state;
+
+	state = p_state
+
+
+
+
+	return state;
+}
+
+
+
+
+// unsigned char WaitFlash_Clk;
+// unsigned char GameOverFlash_Clk;
+// unsigned char Debounce_Clk;
+// unsigned char Game_Clk;
+//
+// // Timer function
+// void TimerISR() {
+//
+// }
+//
+// int main() {
+//
+// 	const unsigned int WaitFlash_Period = 50;
+// 	const unsigned int GameOverFlash_Period = 50;
+// 	const unsigned int Debounce_Period = 20;
+// 	const unsigned int Game_Period = 100;
+//
+// 	// Skip the math here, but should come out to a universal period of 10 ms
+// 	const unsigned int Concurrent_Period = 10;
+// 	TimerSet(Concurrent_Period);
+// 	TimerOn();
+//
+// 	SM1_State = -1; // Initial state
+// 	B = 0; // Init outputs
+//
+// 	while(1) {
+// 		TickFct_State_machine_1();
+// 		while(!SM1_Clk);
+// 		SM1_Clk = 0;
+// 	} // while (1)
+// } // Main

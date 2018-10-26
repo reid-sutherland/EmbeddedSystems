@@ -1,4 +1,4 @@
-/*
+ /*
 This code was automatically generated using the Riverside-Irvine State machine Builder tool
 Version 2.8 --- 10/21/2018 14:19:42 PST
 */
