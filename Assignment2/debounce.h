@@ -65,7 +65,6 @@ int TickFunc_Debounce(int p_state) {
 			}
 			break;
 		default:
-			btnPressed = 0;
 			debTimer = 0;
 			state = D_offLow;
 			break;

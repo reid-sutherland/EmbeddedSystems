@@ -7,14 +7,15 @@
 /* Function Headers */
 int checkGuess();
 unsigned char getNumIncorrectBits();
-void resetD();
-int getD();
-void decrementD();
 unsigned char getBit(unsigned char x, unsigned char k);
+void resetD();
+unsigned char getD();
+void decrementD();
 
 /* GLOBAL VARIABLES HERE */
 unsigned char secret_code = (char) SECRET_CODE;		// THE secret code to be guessed
 int winCondition;		// high if game ends in win, low for lose
+int correctGuess;		// high when submitted guess is correct
 int btnPressed;		// high when guess submission button is pressed
 
 int WF_enable;		// enable the wait flash cycle on B
@@ -27,20 +28,18 @@ int GOF_enable;		// enable the game over flash pattern for end game
 // Returns 0 for incorrect, 1 for correct
 int checkGuess() {
 	if (A == secret_code) {
+		correctGuess = 1;
 		return 1;
 	}
-
 	// return lose if A does not match secret code
+	correctGuess = 0;
 	return 0;
 }
 
 // Returns the number of incorrect bits on A
-// TODO: if this has problems, switch to XOR. Number of 1s in result of XOR should
-//  be the number of incorrect bits
 unsigned char getNumIncorrectBits() {
 	unsigned char num = 0;
-
-	// compute A XOR code
+	// compute A XOR secret_code
 	unsigned char xor_result = A ^ secret_code;
 	// count number of incorrect bits - each 1 is a mismatched bit
 	for (int i = 0; i < 8; i++) {
@@ -49,6 +48,11 @@ unsigned char getNumIncorrectBits() {
 		}
 	}
 	return num;
+}
+
+// getBit function - borrowed from ZyBooks
+unsigned char getBit(unsigned char x, unsigned char k) {
+   return ((x & (0x01 << k)) != 0);
 }
 
 // *** I am bad at pin math, so I am essentially taking some shortcuts to overcome
@@ -67,23 +71,28 @@ void resetD() {
 }
 
 // Returns the value of D as an integer
-int getD() {
-	unsigned int Dval = 0;
+unsigned char getD() {
+	unsigned char Dval = 0;
 
-	Dval += ((int)D0 * 1);
-	Dval += ((int)D1 * 2);
-	Dval += ((int)D2 * 4);
-	Dval += ((int)D3 * 8);
-	Dval += ((int)D4 * 16);
-	Dval += ((int)D5 * 32);
-	Dval += ((int)D6 * 64);
-	Dval += ((int)D7 * 128);
+	Dval += (D0 * 1);
+	Dval += (D1 * 2);
+	Dval += (D2 * 4);
+	Dval += (D3 * 8);
+	Dval += (D4 * 16);
+	Dval += (D5 * 32);
+	Dval += (D6 * 64);
+	Dval += (D7 * 128);
 
 	return Dval;
 }
 
 // Decrements D, 1 bit at a time
 void decrementD() {
+	// if D = 0, stop
+	if (!D0 && !D1 && !D2 && !D3 && !D4 && !D5 && !D6 && !D7) {
+		return;
+	}
+
 	// starting with least significant bit, flip each 0 bit to 1 until you get
 	//  to the first 1. Flip that bit, then stop
 	if (D0 == 0) {
@@ -112,7 +121,7 @@ void decrementD() {
 
 	if (D3 == 0) {
 		D3 = 1;		// flip each low bit
-	}int
+	}
 	else if (D3 == 1) {
 		D3 = 0;		// flip the first high bit, then stop
 		return;
@@ -151,11 +160,6 @@ void decrementD() {
 	}
 
 	return;
-}
-
-// getBit function - borrowed from ZyBooks
-unsigned char getBit(unsigned char x, unsigned char k) {
-   return ((x & (0x01 << k)) != 0);
 }
 
 

@@ -80,6 +80,7 @@ int TickFunc_WaitFlash(int p_state) {
 				B = 32;
 				state = WF_S7
 			}
+			break;
 		case WF_S7:
 			if (!WF_enable) {
 				B = 0;
@@ -99,6 +100,7 @@ int TickFunc_WaitFlash(int p_state) {
 				B = 128;
 				state = WF_S9;
 			}
+			break;
 		case WF_S9:
 			B = 0;
 			state = WF_S0;
