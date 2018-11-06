@@ -32,7 +32,7 @@ int main() {
 		// read input
 		fgets(input_buffer, MAX_BUFFER_LEN-1, stdin);
 
-		// lets get rid of that newline if it's there
+		// let's get rid of that newline if it's there
 		int last = strlen(input_buffer) - 1;
 		if (input_buffer[last] == '\n') {
 			input_buffer[last] = '\0';
