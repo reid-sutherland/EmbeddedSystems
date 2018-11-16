@@ -18,6 +18,7 @@
 #define NOTE_R 7
 
 // Encoding information
+#define TERMINATOR 0xE0		// Code for R0
 #define BINARY_A 0b00000000
 #define BINARY_B 0b00100000
 #define BINARY_C 0b01000000
@@ -35,34 +36,38 @@ char userInputBuffer[MAX_BUFFER_LENGTH];
 char songTitles[MAX_NUM_SONGS][MAX_TITLE_LENGTH] =
 	{"Hello", "Hi Hello hello helLo", "oDeSzA", "there  hi hi hello hello"};
 char songs[MAX_NUM_SONGS][MAX_SONG_LENGTH] = {{(NOTE_B<<5)+2 ,(NOTE_A<<5) +2,(NOTE_G<<5) +2 },{NOTE_R<<5},{NOTE_R<<5},{NOTE_R<<5}};
-int NUM_SONGS;
+int numSongs;
 
 
-// Function headers (with checklist)
+// Required Function headers (with checklist)
 void StripEOL(char string[], int n);		// FINISHED, not fully tested (can't simulate \n or \r)
-uint8_t DisplayMenu(const char menu[]);		// FINISHED, TESTED
-void ListSongs(char songTitle[MAX_NUM_SONGS][MAX_TITLE_LENGTH]);		// FINISHED, TESTED
-void PlaySong(uint8_t song[]);		// not started
-uint8_t PackNote(char letterASCII, uint8_t duration);		// FINISHED, TESTED
-uint8_t UnpackNoteLetterASCII(uint8_t packedNote);		// FINISHED, TESTED
-uint8_t UnpackNoteDuration(uint8_t packednote);		// FINISHED, TESTED
-void StoreSong(uint8_t song[], const char songString[]);		// FINISHED, TESTED
-void PlayNote(uint8_t letterASCII, uint8_t quarters);		// not started
-int MatchScore(const char countQueryString[], const char templates[]);		// not started
+uint8_t DisplayMenu(const char menu[]);		// finished, tested
+void ListSongs(char songTitle[MAX_NUM_SONGS][MAX_TITLE_LENGTH]);		// finished, tested
+void PlaySong(uint8_t song[]);		// finished, tested
+uint8_t PackNote(char letterASCII, uint8_t duration);		// finished, tested
+uint8_t UnpackNoteLetterASCII(uint8_t packedNote);		// finished, tested
+uint8_t UnpackNoteDuration(uint8_t packednote);		// finished, tested
+void StoreSong(uint8_t song[], const char songString[]);		// finished, tested
+void PlayNote(uint8_t letterASCII, uint8_t quarters);		// NOT STARTED
+int MatchScore(const char countQueryString[], const char templates[]);		// finished, tested
+// Additional function headers
+int PlayByNumber();		// Helper
+int CreateSong();		// Helper
 void print_binary(uint8_t n);		// extra
+void testMainLoop();		// extra
 
 
 int main() {
 
-	const char menuMain[] = "Main Menu\nCreate Song\nPlay Song\nList Songs\n";
-	const char menuPlay[] = "Play Menu\nSearch By Title\nNumber\n";
+	const char menuMain[] = "Main Menu\nList Songs\nPlay Song\nCreate Song\n";
+	const char menuPlay[] = "Play Song Menu\nPlay By Number\nSearch By Title\n";
 
 	// count number of songs (that exist)
-	NUM_SONGS = 0;
+	numSongs = 0;
 	for (int i = 0; i < MAX_NUM_SONGS; i++) {
 		// increment if not null
 		if (songs[i][0] != '\0')
-			NUM_SONGS++;
+			numSongs++;
 	}
 
 	// LOOP
@@ -87,9 +92,13 @@ int main() {
 		if (strcmp(userInputBuffer, "exit()\n") == 0 || strcmp(userInputBuffer, "exit\n") == 0)
 			break;
 
-		// TEST functions
 		// get rid of the endline character
 		StripEOL(userInputBuffer, strlen(userInputBuffer));
+
+		if (strcmp(userInputBuffer, "test") == 0)
+			testMainLoop();
+
+		// TEST functions
 		// Display Menu
 		// uint8_t choice = DisplayMenu(menuPlay);
 		// List Songs
@@ -99,47 +108,179 @@ int main() {
 		// char test = UnpackNoteLetterASCII(note);
 		// uint8_t test2 = UnpackNoteDuration(note);
 
+		// Match Score (Choose song functionality)
+		// int score = 0, topScore = 0, bestMatch = 0;
+		// for (int i = 0; i < MAX_NUM_SONGS; i++) {
+		// 	printf("\n\n%i\n", i);
+		// 	score = MatchScore(userInputBuffer, songTitles[i]);
+		// 	if (score > topScore) {
+		// 		topScore = score;
+		// 		bestMatch = i;
+		// 	}
+		// }
+		// // No matches found
+		// if (topScore == 0) {
+		// 	printf("No matches found\n");
+		// }
+		// else {
+		// 	printf("Best Match:    %i.  %s\n", bestMatch+1, songTitles[bestMatch]);
+		// 	printf("PlaySong()\n");
+		// }
+
 		// Store Song
 		// const char songStringTest[] = "B2A2G3R1B10R0A20G30";
 		// uint8_t* songTest = (uint8_t*)calloc(MAX_SONG_LENGTH, sizeof(uint8_t));
 		// StoreSong(songTest, songStringTest);
-		// while (*songTest != 0xE0) {
+		// while (*songTest != TERMINATOR) {
 		// 	print_binary(*songTest);
 		// 	songTest++;
 		// }
 		// print_binary(*songTest);
 		// printf("\n");
 
-		// Match Score (Choose song functionality)
-		int score = 0, topScore = 0, bestMatch = 0;
-		for (int i = 0; i < MAX_NUM_SONGS; i++) {
-			printf("\n\n%i\n", i);
-			score = MatchScore(userInputBuffer, songTitles[i]);
-			if (score > topScore) {
-				topScore = score;
-				bestMatch = i;
-			}
-			printf("score = %i\n", score);
-		}
-		// No matches found
-		if (topScore == 0) {
-			printf("No matches found\n");
-		}
-		else {
-			printf("Best Match:    %i.  %s\n", bestMatch+1, songTitles[bestMatch]);
-			printf("Score:  %i\n", topScore);  // TODO: remove this
-			printf("PlaySong()\n");
-		}
+		// PlaySong
+		// const char songStringTest[] = "B2A2G3R1B10R0A20G30";
+		// uint8_t* songTest = (uint8_t*)calloc(MAX_SONG_LENGTH, sizeof(uint8_t));
+		// StoreSong(songTest, songStringTest);
+		// PlaySong(songTest);
+
+		// PlayNote
 
 	}
 
 	return 0;
 }
 
-// ********** FUNCTIONS listed here **********
-//! Since these are provided functions with descriptions in the assignment document,
-//  I'm going to stop pretending to describe them in my own words as if I came up with them :)
 
+// **************** EXTRA FUNCTIONS ****************
+//  1. Helper functions similar to required
+//  2. Random functions used for various testing
+// *************************************************
+
+// This function handles the UI and error checking for
+// picking a song to play by number.
+// uint8_t PlayByNumber() {
+// 	printf("\n");
+// 	// print menu title
+// 	printf("\n=====");
+// 	token = strtok(menuCopy, "\n");
+// 	printf("%s", token);
+// 	printf("=====\n");
+// 	int numEquals = strlen(token) + 10;
+// 	// print each list element and count the options
+// 	int optCount = 0;
+// 	token = strtok(NULL, "\n");
+// 	while (token != NULL) {
+// 		optCount++;
+// 		printf("%d:  %s\n", optCount, token);
+// 		// get the next option if it exists
+// 		token = strtok(NULL, "\n");
+// 	}
+// 	// error if no options to print (we should never get here)
+// 	if (optCount == 1) {
+// 		printf("Error: No options to display\n");
+// 		return -1;
+// 	}
+// 	// print end of menu
+// 	for (int i = 0; i < numEquals; i++)
+// 		printf("=");
+// 	printf("\n");
+// 	// prompt user for choice until they enter a valid choice
+// 	int choice = 0;
+// 	while (1) {
+// 		printf("Please Enter Choice (1-%d):  ", optCount);
+// 		fgets(userInputBuffer, MAX_BUFFER_LENGTH-1, stdin);
+// 		choice = atoi(userInputBuffer);
+// 		// end condition
+// 		if (choice > 0 && choice <= optCount)
+// 			break;
+// 		// loop condition
+// 		else
+// 			printf("*** Invalid Input ***\n\n");
+// 	}
+//
+// 	return choice;
+// }
+
+// Handles the UI and error detection for creating a new song
+// Capitalization of letters is done in StoreSong
+// Returns 1 and stores the song if no invalid inputs
+// Returns 0 and does not store if invalid inputs are present
+int CreateSong() {
+	printf("\n");
+
+	// Prompt for index
+	printf("Which song would you like to overwrite? (1-4):  ");
+	fgets(userInputBuffer, MAX_BUFFER_LENGTH-1, stdin);
+	int choice = atoi(userInputBuffer);		// ignores everything after the number
+	if (choice < 1 || choice > 4) {
+		printf("*** Invalid Choice ***\n");
+		printf("returning to MainMenu...\n\n");
+		return 0;
+	}
+	choice--;		// actual song index is offset by 1
+	printf("index = %i\n", choice);
+
+	// Prompt for title
+	printf("Please Enter the Title of your Song:  ");
+	fgets(userInputBuffer, MAX_TITLE_LENGTH, stdin);
+	// get rid of the endline character
+	StripEOL(userInputBuffer, strlen(userInputBuffer));
+	// store buffer in title
+	char title[MAX_TITLE_LENGTH] = userInputBuffer;
+	printf("title = %s\n", title);
+
+	// Prompt for song string
+	printf("Please Enter your Song [A-G or R (rest) followed by quarter seconds (0-31)]:  ");
+	fgets(userInputBuffer, MAX_BUFFER_LENGTH-1, stdin);
+	// get rid of the endline character
+	StripEOL(userInputBuffer, strlen(userInputBuffer));
+	// check for valid inputs
+	int valid = 1;
+	char* pch = userInputBuffer;
+	while (*pch != '\0') {
+		// check for valid letter (ABCDEFGR abcdefgr)
+
+	}
+}
+
+// print a binary string from uint8_t
+// DISCLAIMER: I found this on stack overflow
+void print_binary(uint8_t n) {
+	int numbits = sizeof(uint8_t) * 8;
+	while(--numbits >= 0) {
+		printf("%c", (n & ((uint8_t)1<<numbits)) ? '1' : '0');
+	}
+	printf("\n");
+}
+
+// void testMainLoop() {
+// 	const char menuMain[] = "Main Menu\nList Songs\nPlay Song\nCreate Song\n";
+// 	const char menuPlay[] = "Play Song Menu\nPlay By Number\nSearch By Title\n";
+// 	uint8_t choice;
+// 	static enum States {Init, MainMenu, ListSongs, PlaySongMenu, CreateSong, PlayByNumber, SearchByTitle, PlaySong} state;
+//
+// 	state = Init;
+// 	// Main menu
+// 	while (1) {
+// 		// State Transitions
+// 		switch (state) {
+// 			case Init:
+// 				state =
+// 		}
+// 		choice = DisplayMenu =
+// 	}
+// 	choice = DisplayMenu(menuMain);
+//
+
+}
+
+
+// ****************** REQUIRED FUNCTIONS LISTED HERE ******************
+//! Since these are provided functions with descriptions
+//  in the assignment document, I'm going to stop pretending
+//  to describe them in my own words as if I came up with them :)
+// ********************************************************************
 
 // *** Strip EOL ***
 void StripEOL(char string[], int n) {
@@ -153,7 +294,6 @@ void StripEOL(char string[], int n) {
 	}
 }
 
-
 // *** Display Menu ***
 // it only reads until the first non-number of user input, everything else is discarded
 uint8_t DisplayMenu(const char menu[]) {
@@ -162,6 +302,7 @@ uint8_t DisplayMenu(const char menu[]) {
 	strcpy(menuCopy, menu);
 	char* token;
 
+	// Print menu
 	// print menu title
 	printf("\n=====");
 	token = strtok(menuCopy, "\n");
@@ -186,6 +327,8 @@ uint8_t DisplayMenu(const char menu[]) {
 	for (int i = 0; i < numEquals; i++)
 		printf("=");
 	printf("\n");
+
+	// UI flow
 	// prompt user for choice until they enter a valid choice
 	int choice = 0;
 	while (1) {
@@ -197,12 +340,11 @@ uint8_t DisplayMenu(const char menu[]) {
 			break;
 		// loop condition
 		else
-			printf("*** Invalid Input ***\n\n");
+			printf("*** Invalid Choice ***\n\n");
 	}
 
 	return choice;
 }
-
 
 // *** List Songs ***
 void ListSongs(char titles[MAX_NUM_SONGS][MAX_TITLE_LENGTH]) {
@@ -224,10 +366,20 @@ void ListSongs(char titles[MAX_NUM_SONGS][MAX_TITLE_LENGTH]) {
 	printf("===================\n\n");
 }
 
-
 // *** Play Song ***
-void PlaySong(uint8_t song[]);
-
+void PlaySong(uint8_t song[]) {
+	const uint8_t* songPtr = song;	// songs iterator
+	uint8_t note, letter, duration;	// note features
+	// loop through song notes
+	note = *songPtr;
+	while (note != TERMINATOR) {
+		letter = UnpackNoteLetterASCII(note);
+		duration = UnpackNoteDuration(note);
+		// play the note
+		PlayNote(letter, duration);
+		note = *++songPtr;
+	}
+}
 
 // *** Pack/Unpack Note Functions ***
 // PackNote takes input provided from a songString and packs into bytes as described
@@ -300,14 +452,13 @@ uint8_t UnpackNoteLetterASCII(uint8_t packedNote) {
 }
 // UnpackNoteDuration returns the number of quarter seconds a note will be played.
 uint8_t UnpackNoteDuration(uint8_t packedNote) {
-	// clear the last 3 bits
+	// clear the first 3 bits
 	return (packedNote & 0x1F);
 }
 
-
 // *** Store Song ***
 // Capitalizes letters found in songString before packing
-// Assumes the songsString is valid (checking done in UI flow)
+// Assumes the songsString is valid (checking done in CreateSong)
 void StoreSong(uint8_t song[], const char songString[]) {
 	// pointer to current song being written to
 	uint8_t* songIndex = song;
@@ -347,23 +498,19 @@ void StoreSong(uint8_t song[], const char songString[]) {
 
 	// append terminating character last
 	uint8_t noteByte = PackNote('R', 0);
-	*songIndex =  noteByte;
+	*songIndex = noteByte;
 }
 
-
 // *** Play Note ***
-void PlayNote(uint8_t letterASCII, uint8_t quarters);
-
+void PlayNote(uint8_t letterASCII, uint8_t quarters) {
+	printf("Play Note for %c%i\n", (char)letterASCII, quarters);
+}
 
 // *** Matching Function
 int MatchScore(const char countQueryString[], const char templates[]) {
 	// score is 0 if either string is null
 	if (countQueryString[0] == '\0' || templates[0] == '\0')
 		return 0;
-
-	{
-		char foo[4][100] = {"Hello", "Hi Hello hello helLo", "oDeSzA", "there  hi hi hello hello"};
-	}
 
 	// pointers to act as cursors
 	char* queryPtr;
@@ -379,7 +526,7 @@ int MatchScore(const char countQueryString[], const char templates[]) {
 	char *pch;	// ptr to traverse tokens
 
 	// can only use strtok for one thing at a time, so
-	// let's get those query tokens beforehand
+	// let's get those query tokens beforehand, then get template tokens
 	char queryTokens[MAX_BUFFER_LENGTH][MAX_BUFFER_LENGTH];
 	int queryCount = 0;
 	queryPtr = strtok(queryBuffer, " ");	// read first query token
@@ -387,7 +534,6 @@ int MatchScore(const char countQueryString[], const char templates[]) {
 		// convert query token to lowercase
 		pch = queryPtr;
 		while (*pch != '\0') {
-			printf("tolower Query\n");
 			*pch = tolower(*pch);
 			pch++;
 		}
@@ -396,21 +542,15 @@ int MatchScore(const char countQueryString[], const char templates[]) {
 		queryPtr = strtok(NULL, " ");	// read next query token
 		queryCount++;
 	}
-	printf("print queries:\n");
-	for (int i = 0; i < queryCount; i++) {
-		printf("%s  ", queryTokens[i]);
-	}
-	printf("\n");
 
 	// for each query token, read each template token and look for matches
 	for (int queryIter = 0; queryIter < queryCount; queryIter++) {
+		strcpy(templateBuffer, templates);	// recopy templates into buffer
 		templatePtr = strtok(templateBuffer, " ");	// read first template token
 		while (templatePtr != NULL) {
-			printf("1templatePtr = %s\n", templatePtr);
 			// convert template token to lowercase
 			pch = templatePtr;
 			while (*pch != '\0') {
-				printf("tolower Template\n");
 				*pch = tolower(*pch);
 				pch++;
 			}
@@ -418,61 +558,11 @@ int MatchScore(const char countQueryString[], const char templates[]) {
 			// increment score on first match
 			// move on to next query token
 			if (strcmp(queryTokens[queryIter], templatePtr) == 0) {
-				score++;
-				printf("Match!\n");
+				score++;	// Match!
 				break;
 			}
 			templatePtr = strtok(NULL, " ");	// read next template token
-			printf("2templatePtr = %s\n", templatePtr);
 		}
 	}
-
-	// queryPtr = strtok(queryBuffer, " ");	// read first query token
-	// while (queryPtr != NULL) {
-	// 	// convert query token to lowercase
-	// 	pch = queryPtr;
-	// 	while (*pch != '\0') {
-	// 		printf("tolower Query\n");
-	// 		*pch = tolower(*pch);
-	// 		pch++;
-	// 	}
-	//
-	// 	templatePtr = strtok(templateBuffer, " ");	// read first template token
-	// 	while (templatePtr != NULL) {
-	// 		printf("1templatePtr = %s\n", templatePtr);
-	// 		// convert template token to lowercase
-	// 		pch = templatePtr;
-	// 		while (*pch != '\0') {
-	// 			printf("tolower Template\n");
-	// 			*pch = tolower(*pch);
-	// 			pch++;
-	// 		}
-	//
-	// 		// increment score on first match
-	// 		// move on to next query token
-	// 		if (strcmp(queryPtr, templatePtr) == 0) {
-	// 			score++;
-	// 			printf("Match!\n");
-	// 			break;
-	// 		}
-	// 		templatePtr = strtok(NULL, " ");	// read next template token
-	// 		printf("2templatePtr = %s\n", templatePtr);
-	// 	}
-	// 	queryPtr = strtok(NULL, " ");	// read next query token
-	// }
-	{
-		char foo[4][100] = {"Hello", "Hi Hello hello helLo", "oDeSzA", "there  hi hi hello hello"};
-	}
 	return score;
-}
-
-
-// print a binary string from uint8_t
-// DISCLAIMER: I found this on stack overflow
-void print_binary(uint8_t n) {
-	int numbits = sizeof(uint8_t) * 8;
-	while(--numbits >= 0) {
-		printf("%c", (n & ((uint8_t)1<<numbits)) ? '1' : '0');
-	}
-	printf("\n");
 }
