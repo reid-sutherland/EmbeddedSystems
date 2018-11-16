@@ -1,7 +1,7 @@
 #include <stdlib.h>		// malloc/calloc
 #include <stdio.h>
 #include <stdint.h>		// include uint8_t typedefs, not needed for arduino
-#include <ctype.h>		// isspace()
+#include <ctype.h>		// isspace(), tolower()
 #include <string.h>
 
 // Song information
@@ -32,8 +32,10 @@
 
 // Global variables
 char userInputBuffer[MAX_BUFFER_LENGTH];
-char songTitles[MAX_NUM_SONGS][MAX_TITLE_LENGTH] = {"Title1", "Title2", "Title3", "Title4"};
+char songTitles[MAX_NUM_SONGS][MAX_TITLE_LENGTH] =
+	{"Hello", "Hi Hello hello helLo", "oDeSzA", "there  hi hi hello hello"};
 char songs[MAX_NUM_SONGS][MAX_SONG_LENGTH] = {{(NOTE_B<<5)+2 ,(NOTE_A<<5) +2,(NOTE_G<<5) +2 },{NOTE_R<<5},{NOTE_R<<5},{NOTE_R<<5}};
+int NUM_SONGS;
 
 
 // Function headers (with checklist)
@@ -44,7 +46,7 @@ void PlaySong(uint8_t song[]);		// not started
 uint8_t PackNote(char letterASCII, uint8_t duration);		// FINISHED, TESTED
 uint8_t UnpackNoteLetterASCII(uint8_t packedNote);		// FINISHED, TESTED
 uint8_t UnpackNoteDuration(uint8_t packednote);		// FINISHED, TESTED
-void StoreSong(uint8_t song[], const char songString[]);		// not started
+void StoreSong(uint8_t song[], const char songString[]);		// FINISHED, TESTED
 void PlayNote(uint8_t letterASCII, uint8_t quarters);		// not started
 int MatchScore(const char countQueryString[], const char templates[]);		// not started
 void print_binary(uint8_t n);		// extra
@@ -55,9 +57,16 @@ int main() {
 	const char menuMain[] = "Main Menu\nCreate Song\nPlay Song\nList Songs\n";
 	const char menuPlay[] = "Play Menu\nSearch By Title\nNumber\n";
 
+	// count number of songs (that exist)
+	NUM_SONGS = 0;
+	for (int i = 0; i < MAX_NUM_SONGS; i++) {
+		// increment if not null
+		if (songs[i][0] != '\0')
+			NUM_SONGS++;
+	}
+
 	// LOOP
 	while (1) {
-
 		// print >>>
 		printf("Test >>> ");
 		// read input
@@ -81,11 +90,47 @@ int main() {
 		// TEST functions
 		// get rid of the endline character
 		StripEOL(userInputBuffer, strlen(userInputBuffer));
+		// Display Menu
 		// uint8_t choice = DisplayMenu(menuPlay);
+		// List Songs
 		// ListSongs(songTitles);
+		// Pack/Unpack functions
 		// uint8_t note = PackNote('E', (uint8_t) 0);
 		// char test = UnpackNoteLetterASCII(note);
 		// uint8_t test2 = UnpackNoteDuration(note);
+
+		// Store Song
+		// const char songStringTest[] = "B2A2G3R1B10R0A20G30";
+		// uint8_t* songTest = (uint8_t*)calloc(MAX_SONG_LENGTH, sizeof(uint8_t));
+		// StoreSong(songTest, songStringTest);
+		// while (*songTest != 0xE0) {
+		// 	print_binary(*songTest);
+		// 	songTest++;
+		// }
+		// print_binary(*songTest);
+		// printf("\n");
+
+		// Match Score (Choose song functionality)
+		int score = 0, topScore = 0, bestMatch = 0;
+		for (int i = 0; i < MAX_NUM_SONGS; i++) {
+			printf("\n\n%i\n", i);
+			score = MatchScore(userInputBuffer, songTitles[i]);
+			if (score > topScore) {
+				topScore = score;
+				bestMatch = i;
+			}
+			printf("score = %i\n", score);
+		}
+		// No matches found
+		if (topScore == 0) {
+			printf("No matches found\n");
+		}
+		else {
+			printf("Best Match:    %i.  %s\n", bestMatch+1, songTitles[bestMatch]);
+			printf("Score:  %i\n", topScore);  // TODO: remove this
+			printf("PlaySong()\n");
+		}
+
 	}
 
 	return 0;
@@ -262,12 +307,47 @@ uint8_t UnpackNoteDuration(uint8_t packedNote) {
 
 // *** Store Song ***
 // Capitalizes letters found in songString before packing
+// Assumes the songsString is valid (checking done in UI flow)
 void StoreSong(uint8_t song[], const char songString[]) {
+	// pointer to current song being written to
+	uint8_t* songIndex = song;
 	// pointer to first character in songString
-	char* cursor = songString;
+	const char* cursor = songString;
+	char letter;
+	uint8_t duration;
+	// read through the song string
 	while (*cursor != '\0') {
-		
+		// read char
+		letter = *cursor;
+		// capitalize lowercase letters
+		if (letter >= 97 && letter <= 122) {
+			// TODO: remove this!
+			// printf("Capitalizing letter '%c' to letter '%c'\n", letter, letter-32);
+			letter -= 32;
+		}
+		cursor++;
+		// read uint8
+		duration = (uint8_t) atoi(cursor);
+		// increment pointer by how many digits read
+		if (duration > 9)
+			cursor += 2;
+		else
+			cursor++;
+
+		// terminate here if R0 found
+		if (letter == 'R' && duration == 0) {
+			break;
+		}
+		// pack note into byte
+		uint8_t noteByte = PackNote(letter, duration);
+		// add note to song
+		*songIndex = noteByte;
+		songIndex++;
 	}
+
+	// append terminating character last
+	uint8_t noteByte = PackNote('R', 0);
+	*songIndex =  noteByte;
 }
 
 
@@ -276,7 +356,115 @@ void PlayNote(uint8_t letterASCII, uint8_t quarters);
 
 
 // *** Matching Function
-int MatchScore(const char countQueryString[], const char templates[]);
+int MatchScore(const char countQueryString[], const char templates[]) {
+	// score is 0 if either string is null
+	if (countQueryString[0] == '\0' || templates[0] == '\0')
+		return 0;
+
+	{
+		char foo[4][100] = {"Hello", "Hi Hello hello helLo", "oDeSzA", "there  hi hi hello hello"};
+	}
+
+	// pointers to act as cursors
+	char* queryPtr;
+	char* templatePtr;
+	// allocate memory and copy string
+	char* queryBuffer = (char*) calloc(MAX_BUFFER_LENGTH, sizeof(char));
+	strcpy(queryBuffer, countQueryString);
+	char* templateBuffer = (char*) calloc(MAX_SONG_LENGTH, sizeof(char));
+	strcpy(templateBuffer, templates);
+
+	//! Read each token from both strings
+	int score = 0;		// match score
+	char *pch;	// ptr to traverse tokens
+
+	// can only use strtok for one thing at a time, so
+	// let's get those query tokens beforehand
+	char queryTokens[MAX_BUFFER_LENGTH][MAX_BUFFER_LENGTH];
+	int queryCount = 0;
+	queryPtr = strtok(queryBuffer, " ");	// read first query token
+	while (queryPtr != NULL) {
+		// convert query token to lowercase
+		pch = queryPtr;
+		while (*pch != '\0') {
+			printf("tolower Query\n");
+			*pch = tolower(*pch);
+			pch++;
+		}
+		// copy token into query array
+		strcpy(queryTokens[queryCount], queryPtr);
+		queryPtr = strtok(NULL, " ");	// read next query token
+		queryCount++;
+	}
+	printf("print queries:\n");
+	for (int i = 0; i < queryCount; i++) {
+		printf("%s  ", queryTokens[i]);
+	}
+	printf("\n");
+
+	// for each query token, read each template token and look for matches
+	for (int queryIter = 0; queryIter < queryCount; queryIter++) {
+		templatePtr = strtok(templateBuffer, " ");	// read first template token
+		while (templatePtr != NULL) {
+			printf("1templatePtr = %s\n", templatePtr);
+			// convert template token to lowercase
+			pch = templatePtr;
+			while (*pch != '\0') {
+				printf("tolower Template\n");
+				*pch = tolower(*pch);
+				pch++;
+			}
+
+			// increment score on first match
+			// move on to next query token
+			if (strcmp(queryTokens[queryIter], templatePtr) == 0) {
+				score++;
+				printf("Match!\n");
+				break;
+			}
+			templatePtr = strtok(NULL, " ");	// read next template token
+			printf("2templatePtr = %s\n", templatePtr);
+		}
+	}
+
+	// queryPtr = strtok(queryBuffer, " ");	// read first query token
+	// while (queryPtr != NULL) {
+	// 	// convert query token to lowercase
+	// 	pch = queryPtr;
+	// 	while (*pch != '\0') {
+	// 		printf("tolower Query\n");
+	// 		*pch = tolower(*pch);
+	// 		pch++;
+	// 	}
+	//
+	// 	templatePtr = strtok(templateBuffer, " ");	// read first template token
+	// 	while (templatePtr != NULL) {
+	// 		printf("1templatePtr = %s\n", templatePtr);
+	// 		// convert template token to lowercase
+	// 		pch = templatePtr;
+	// 		while (*pch != '\0') {
+	// 			printf("tolower Template\n");
+	// 			*pch = tolower(*pch);
+	// 			pch++;
+	// 		}
+	//
+	// 		// increment score on first match
+	// 		// move on to next query token
+	// 		if (strcmp(queryPtr, templatePtr) == 0) {
+	// 			score++;
+	// 			printf("Match!\n");
+	// 			break;
+	// 		}
+	// 		templatePtr = strtok(NULL, " ");	// read next template token
+	// 		printf("2templatePtr = %s\n", templatePtr);
+	// 	}
+	// 	queryPtr = strtok(NULL, " ");	// read next query token
+	// }
+	{
+		char foo[4][100] = {"Hello", "Hi Hello hello helLo", "oDeSzA", "there  hi hi hello hello"};
+	}
+	return score;
+}
 
 
 // print a binary string from uint8_t
