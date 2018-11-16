@@ -1,0 +1,58 @@
+List Songs Function
+# void ListSongs(char songTitle[NUM SONGS][MAX TITLE LENGTH]);
+ListSongs prints an organized list of songs.
+
+
+Play Song Function
+# void PlaySong(uint8 t song[]);
+PlaySong plays a stored song with ending indicated by R0. Each byte should be defined
+using the above structure. The PlaySong function uses the Piezo Buzzer element to
+play a tones.
+
+
+Pack/Unpack Note Functions
+# uint8 t PackNote(char letterASCII, uint8 t duration);
+PackNote takes input provided from a songString and packs into bytes as described
+above. Note that the letter is NOT stored in ASCII.
+# uint8 t UnpackNoteLetterASCII(uint8 t packedNote);
+UnpackNoteLetterASCII returns ASCII character of a packed note.
+# uint8 t UnpackNoteDuration(uint8 t packedNote);
+UnpackNoteDuration returns the number of quarter seconds a note will be played.
+
+
+Store Song Function
+# void StoreSong(uint8 t song[], const char songString[]);
+StoreSong takes ASCII input provided in songString and packs information into song
+bytes. SongString should be note-duration pairs such as “B2A2G3R1B10R0A20G30”.
+Lower-case notes should also be accepted. R corresponds to silence. Any zero-length-silences
+R0 indicate the end of the song. Notes following an R0 should not be stored.
+Storage format must be compatible with PlaySong function and adhere to other descriptions
+in this document.
+
+
+Play Note Functions
+# void PlayNote(uint8 t letterASCII, uint8 t quarters);
+You will need functions to play notes for variable duration. Here are example constants
+for a G note:
+#define FREQ_G4_HZ 392
+#define HALFPERIOD_G4_US 1276 // delay in microseconds
+See https://pages.mtu.edu/~suits/notefreqs.html for note frequencies.
+Pseudo-code for the playNote function:
+	1. Declare integers numIterations and halfPeriodMicroseconds
+	2. Based on the ASCII letter, assign halfPeriodMicroseconds and numIterations.
+			The number of iterations can be computed from the period and delay as (freq/4)*quarters.
+	3. Repeat this for numIterations times:
+			{
+			set piezoPin low
+			delay for halfPeriodMicroseconds
+			set piezoPin high
+			delay for halfPeriodMicroseconds
+			}
+
+
+Matching Function
+# int MatchScore(const char countQueryString[], const char templates[]);
+MatchScore treats contents of countQueryString and templates as whitespace-delimited
+tokens. It returns a count of the number of tokens from countQueryString that can be
+found at least once in a template string. All queries should be case-insensitive. Queries
+are defined above.
