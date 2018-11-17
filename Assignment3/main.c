@@ -178,7 +178,7 @@ int PlayByNumber() {
 	}
 	// invalid choice
 	else {
-		printf("\n*** Invalid Choice ***\n");
+		printf("\n*** ERROR: Invalid Choice ***\n");
 		printf("returning to Play Song Menu\n");
 		return 0;
 	}
@@ -221,7 +221,7 @@ void CreateSong() {
 	fgets(userInputBuffer, MAX_BUFFER_LENGTH-1, stdin);
 	int choice = atoi(userInputBuffer);		// ignores everything after the number
 	if (choice < 1 || choice > 4) {
-		printf("\n*** Invalid Choice ***\n");
+		printf("\n*** ERROR: Invalid Choice ***\n");
 		printf("returning to MainMenu...\n\n");
 		return;
 	}
@@ -275,7 +275,7 @@ void CreateSong() {
 		}
 		// stop checking if invalid inputs found, return to menu
 		if (!valid) {
-			printf("\n*** Invalid Song String ***\n");
+			printf("\n*** ERROR: Invalid Song String ***\n");
 			printf("returning to MainMenu...\n\n");
 			return;
 		}
@@ -468,7 +468,7 @@ uint8_t DisplayMenu(const char menu[]) {
 			break;
 		// loop condition
 		else
-			printf("*** Invalid Choice ***\n\n");
+			printf("*** ERROR: Invalid Choice ***\n\n");
 	}
 
 	return choice;
