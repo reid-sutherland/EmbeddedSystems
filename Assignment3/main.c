@@ -35,7 +35,7 @@
 char userInputBuffer[MAX_BUFFER_LENGTH];
 char songTitles[MAX_NUM_SONGS][MAX_TITLE_LENGTH] =
 	{"Hello", "Hi Hello hello helLo", "oDeSzA", "there  hi hi hello hello"};
-char songs[MAX_NUM_SONGS][MAX_SONG_LENGTH] = {{(NOTE_B<<5)+2 ,(NOTE_A<<5) +2,(NOTE_G<<5) +2 },{NOTE_R<<5},{NOTE_R<<5},{NOTE_R<<5}};
+uint8_t songs[MAX_NUM_SONGS][MAX_SONG_LENGTH] = {{ (NOTE_B<<5)+2, (NOTE_A<<5)+2, (NOTE_G<<5)+2, (NOTE_R<<5)},{NOTE_R<<5},{NOTE_R<<5},{NOTE_R<<5}};
 int numSongs;
 
 
@@ -52,7 +52,8 @@ void PlayNote(uint8_t letterASCII, uint8_t quarters);		// NOT STARTED
 int MatchScore(const char countQueryString[], const char templates[]);		// finished, tested
 // Additional function headers
 int PlayByNumber();		// Helper
-int CreateSong();		// Helper
+int SearchByTitle();		// Helper
+void CreateSong();		// Helper
 void print_binary(uint8_t n);		// extra
 void testMainLoop();		// extra
 
@@ -60,7 +61,7 @@ void testMainLoop();		// extra
 int main() {
 
 	const char menuMain[] = "Main Menu\nList Songs\nPlay Song\nCreate Song\n";
-	const char menuPlay[] = "Play Song Menu\nPlay By Number\nSearch By Title\n";
+	const char menuPlay[] = "Play Song Menu\nPlay By Number\nSearch By Title\n<-- Go Back\n";
 
 	// count number of songs (that exist)
 	numSongs = 0;
@@ -111,7 +112,7 @@ int main() {
 		// Match Score (Choose song functionality)
 		// int score = 0, topScore = 0, bestMatch = 0;
 		// for (int i = 0; i < MAX_NUM_SONGS; i++) {
-		// 	printf("\n\n%i\n", i);
+		// // printf("\n\n%i\n", i);
 		// 	score = MatchScore(userInputBuffer, songTitles[i]);
 		// 	if (score > topScore) {
 		// 		topScore = score;
@@ -159,89 +160,137 @@ int main() {
 
 // This function handles the UI and error checking for
 // picking a song to play by number.
-// uint8_t PlayByNumber() {
-// 	printf("\n");
-// 	// print menu title
-// 	printf("\n=====");
-// 	token = strtok(menuCopy, "\n");
-// 	printf("%s", token);
-// 	printf("=====\n");
-// 	int numEquals = strlen(token) + 10;
-// 	// print each list element and count the options
-// 	int optCount = 0;
-// 	token = strtok(NULL, "\n");
-// 	while (token != NULL) {
-// 		optCount++;
-// 		printf("%d:  %s\n", optCount, token);
-// 		// get the next option if it exists
-// 		token = strtok(NULL, "\n");
-// 	}
-// 	// error if no options to print (we should never get here)
-// 	if (optCount == 1) {
-// 		printf("Error: No options to display\n");
-// 		return -1;
-// 	}
-// 	// print end of menu
-// 	for (int i = 0; i < numEquals; i++)
-// 		printf("=");
-// 	printf("\n");
-// 	// prompt user for choice until they enter a valid choice
-// 	int choice = 0;
-// 	while (1) {
-// 		printf("Please Enter Choice (1-%d):  ", optCount);
-// 		fgets(userInputBuffer, MAX_BUFFER_LENGTH-1, stdin);
-// 		choice = atoi(userInputBuffer);
-// 		// end condition
-// 		if (choice > 0 && choice <= optCount)
-// 			break;
-// 		// loop condition
-// 		else
-// 			printf("*** Invalid Input ***\n\n");
-// 	}
-//
-// 	return choice;
-// }
+// returns 1 if a valid song was picked
+// returns 0 if invalid song choice
+int PlayByNumber() {
+	ListSongs(songTitles);
+	// prompt user for choice, return to MainMenu if invalid
+	printf("Which song would you like to play? (1-4):  ");
+	fgets(userInputBuffer, MAX_BUFFER_LENGTH-1, stdin);
+	int choice = atoi(userInputBuffer);
+
+	// valid choice
+	if (choice > 0 && choice <= MAX_NUM_SONGS) {
+		choice--;
+		printf("Selected:    %i.  %s\n", choice+1, songTitles[choice]);
+		PlaySong(songs[choice]);
+		return 1;
+	}
+	// invalid choice
+	else {
+		printf("\n*** Invalid Choice ***\n");
+		printf("returning to Play Song Menu\n");
+		return 0;
+	}
+}
+
+int SearchByTitle() {
+	printf("\nEnter your search query:  ");
+	fgets(userInputBuffer, MAX_BUFFER_LENGTH-1, stdin);
+	// get rid of the endline character
+	StripEOL(userInputBuffer, MAX_BUFFER_LENGTH);
+
+	int score = 0, topScore = 0, bestMatch = 0;
+	for (int i = 0; i < MAX_NUM_SONGS; i++) {
+		score = MatchScore(userInputBuffer, songTitles[i]);
+		if (score > topScore) {
+			topScore = score;
+			bestMatch = i;
+		}
+	}
+	// No matches found
+	if (topScore == 0) {
+		printf("No matches found\n");
+	}
+	else {
+		printf("Best Match:    %i.  %s\n", bestMatch+1, songTitles[bestMatch]);
+		PlaySong(songs[bestMatch]);
+	}
+	return (bestMatch+1);
+}
 
 // Handles the UI and error detection for creating a new song
 // Capitalization of letters is done in StoreSong
 // Returns 1 and stores the song if no invalid inputs
 // Returns 0 and does not store if invalid inputs are present
-int CreateSong() {
-	printf("\n");
+void CreateSong() {
+	printf("\n=====Create Song=====\n");
 
 	// Prompt for index
 	printf("Which song would you like to overwrite? (1-4):  ");
 	fgets(userInputBuffer, MAX_BUFFER_LENGTH-1, stdin);
 	int choice = atoi(userInputBuffer);		// ignores everything after the number
 	if (choice < 1 || choice > 4) {
-		printf("*** Invalid Choice ***\n");
+		printf("\n*** Invalid Choice ***\n");
 		printf("returning to MainMenu...\n\n");
-		return 0;
+		return;
 	}
-	choice--;		// actual song index is offset by 1
-	printf("index = %i\n", choice);
+	int songIndex = choice-1;		// actual song index is offset by 1
 
 	// Prompt for title
-	printf("Please Enter the Title of your Song:  ");
-	fgets(userInputBuffer, MAX_TITLE_LENGTH, stdin);
-	// get rid of the endline character
-	StripEOL(userInputBuffer, strlen(userInputBuffer));
-	// store buffer in title
-	char title[MAX_TITLE_LENGTH] = userInputBuffer;
-	printf("title = %s\n", title);
-
-	// Prompt for song string
-	printf("Please Enter your Song [A-G or R (rest) followed by quarter seconds (0-31)]:  ");
+	printf("Enter the Title of your Song:  ");
 	fgets(userInputBuffer, MAX_BUFFER_LENGTH-1, stdin);
 	// get rid of the endline character
-	StripEOL(userInputBuffer, strlen(userInputBuffer));
+	StripEOL(userInputBuffer, MAX_TITLE_LENGTH);
+	// store buffer in title
+	char title[MAX_TITLE_LENGTH];
+	strcpy(title, userInputBuffer);
+
+	// Prompt for song string
+	printf("FORMAT: [A-G or R (rest) followed by quarter seconds (0-31)]\n");
+	printf("Enter your Song:  ");
+	fgets(userInputBuffer, MAX_BUFFER_LENGTH-1, stdin);
+	// get rid of the endline character
+	StripEOL(userInputBuffer, MAX_SONG_LENGTH);
 	// check for valid inputs
 	int valid = 1;
 	char* pch = userInputBuffer;
 	while (*pch != '\0') {
 		// check for valid letter (ABCDEFGR abcdefgr)
+		char c = *pch;
+		if (  (c >= 65 && c <= 71) ||   // A-G
+				   c == 82 ||               // R
+				  (c >= 97 && c <= 103) ||  // a-g
+				   c == 114 ) {             // r
+			valid = 1;
+		}
+		else {
+			valid = 0;
+		}
+		pch++;
 
+		// check for valid duration (0-31)
+		int d = atoi(pch);
+		// atoi returns 0 if letters found, so make sure its a digit
+		if (!isdigit(*pch))
+			valid = 0;
+		if (d >= 0 && d < 32)	{		// valid duration
+			if (d < 10)
+				pch++;	// increment once for single digit
+			else
+				pch += 2;	// increment twice for double digits
+		}
+		else {
+			valid = 0;
+		}
+		// stop checking if invalid inputs found, return to menu
+		if (!valid) {
+			printf("\n*** Invalid Song String ***\n");
+			printf("returning to MainMenu...\n\n");
+			return;
+		}
 	}
+
+	// Store the valid song string, store the song title
+	if (valid) {	// this should be true
+		char songString[MAX_SONG_LENGTH];
+		strcpy(songString, userInputBuffer);
+		strcpy(songTitles[songIndex], title);
+
+		StoreSong(songs[songIndex], songString);
+		printf("\nSong stored successfully!\n");
+	}
+	return;
 }
 
 // print a binary string from uint8_t
@@ -254,25 +303,104 @@ void print_binary(uint8_t n) {
 	printf("\n");
 }
 
-// void testMainLoop() {
-// 	const char menuMain[] = "Main Menu\nList Songs\nPlay Song\nCreate Song\n";
-// 	const char menuPlay[] = "Play Song Menu\nPlay By Number\nSearch By Title\n";
-// 	uint8_t choice;
-// 	static enum States {Init, MainMenu, ListSongs, PlaySongMenu, CreateSong, PlayByNumber, SearchByTitle, PlaySong} state;
-//
-// 	state = Init;
-// 	// Main menu
-// 	while (1) {
-// 		// State Transitions
-// 		switch (state) {
-// 			case Init:
-// 				state =
-// 		}
-// 		choice = DisplayMenu =
-// 	}
-// 	choice = DisplayMenu(menuMain);
-//
+void testMainLoop() {
+	const char mainMenu[] = "Main Menu\nList Songs\nPlay Song\nCreate Song\n";
+	const char playMenu[] = "Play Song Menu\nPlay By Number\nSearch By Title\n<-- Go Back\n";
+	int mmChoice = 0;		// Main Menu choice
+	int psmChoice = 0;		// Play Song Menu choice
+	int pbnValid = 0;		// Play By Number choice is valid
+	int sbtChoice = 0;		// Search By Title choice (Best Match)
+	static enum States {sInit, sMainMenu, sListSongs, sPlaySongMenu, sCreateSong, sPlayByNumber, sSearchByTitle, sPlaySong} state;
 
+	state = sInit;
+	// Main menu
+	while (1) {
+		// State Transitions
+		switch (state) {
+			case sInit:
+				state = sMainMenu;
+				break;
+			case sMainMenu:
+				if (mmChoice == 1)
+					state = sListSongs;
+				else if (mmChoice == 2)
+					state = sPlaySongMenu;
+				else if (mmChoice == 3)
+					state = sCreateSong;
+				else
+					state = sMainMenu;
+				// reset choice
+				mmChoice = 0;
+				break;
+			case sListSongs:
+				if (1)
+					state = sMainMenu;
+				break;
+			case sPlaySongMenu:
+				if (psmChoice == 1)
+					state = sPlayByNumber;
+				else if (psmChoice == 2)
+					state = sSearchByTitle;
+				else if (psmChoice == 3)
+					state = sMainMenu;
+				else
+					state = sPlaySongMenu;
+				// reset choice
+				psmChoice = 0;
+				break;
+			case sCreateSong:
+				if (1)
+					state = sMainMenu;
+				break;
+			case sPlayByNumber:
+				if (pbnValid)
+					state = sPlaySong;
+				else if (!pbnValid)
+					state = sPlaySongMenu;
+				break;
+			case sSearchByTitle:
+				if (sbtChoice > 0)
+					state = sPlaySong;
+				else if (sbtChoice == 0)
+					state = sPlaySongMenu;
+				break;
+			case sPlaySong:
+				if (1)
+					state = sMainMenu;
+				break;
+			default:
+				state = sInit;
+				break;
+		}
+
+		// State Actions
+		switch (state) {
+			case sInit:
+				break;
+			case sMainMenu:
+				mmChoice = DisplayMenu(mainMenu);
+				break;
+			case sListSongs:
+				ListSongs(songTitles);
+				break;
+			case sPlaySongMenu:
+				psmChoice = DisplayMenu(playMenu);
+				break;
+			case sCreateSong:
+				CreateSong();
+				break;
+			case sPlayByNumber:
+				pbnValid = PlayByNumber();
+				break;
+			case sSearchByTitle:
+				sbtChoice = SearchByTitle();
+				break;
+			case sPlaySong:
+				break;
+			default:
+				break;
+		}
+	}
 }
 
 
@@ -363,11 +491,12 @@ void ListSongs(char titles[MAX_NUM_SONGS][MAX_TITLE_LENGTH]) {
 		printf("%d:  Title:  %s\n", i+1, titles[i]);
 	}
 	// print equals
-	printf("===================\n\n");
+	printf("===================\n");
 }
 
 // *** Play Song ***
 void PlaySong(uint8_t song[]) {
+	printf("\nPlaySong\n");
 	const uint8_t* songPtr = song;	// songs iterator
 	uint8_t note, letter, duration;	// note features
 	// loop through song notes
@@ -459,6 +588,7 @@ uint8_t UnpackNoteDuration(uint8_t packedNote) {
 // *** Store Song ***
 // Capitalizes letters found in songString before packing
 // Assumes the songsString is valid (checking done in CreateSong)
+// Does not need a terminating R0, but will stop if it finds one
 void StoreSong(uint8_t song[], const char songString[]) {
 	// pointer to current song being written to
 	uint8_t* songIndex = song;
