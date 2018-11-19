@@ -99,54 +99,6 @@ int main() {
 		if (strcmp(userInputBuffer, "test") == 0)
 			testMainLoop();
 
-		// TEST functions
-		// Display Menu
-		// uint8_t choice = DisplayMenu(menuPlay);
-		// List Songs
-		// ListSongs(songTitles);
-		// Pack/Unpack functions
-		// uint8_t note = PackNote('E', (uint8_t) 0);
-		// char test = UnpackNoteLetterASCII(note);
-		// uint8_t test2 = UnpackNoteDuration(note);
-
-		// Match Score (Choose song functionality)
-		// int score = 0, topScore = 0, bestMatch = 0;
-		// for (int i = 0; i < MAX_NUM_SONGS; i++) {
-		// // printf("\n\n%i\n", i);
-		// 	score = MatchScore(userInputBuffer, songTitles[i]);
-		// 	if (score > topScore) {
-		// 		topScore = score;
-		// 		bestMatch = i;
-		// 	}
-		// }
-		// // No matches found
-		// if (topScore == 0) {
-		// 	printf("No matches found\n");
-		// }
-		// else {
-		// 	printf("Best Match:    %i.  %s\n", bestMatch+1, songTitles[bestMatch]);
-		// 	printf("PlaySong()\n");
-		// }
-
-		// Store Song
-		// const char songStringTest[] = "B2A2G3R1B10R0A20G30";
-		// uint8_t* songTest = (uint8_t*)calloc(MAX_SONG_LENGTH, sizeof(uint8_t));
-		// StoreSong(songTest, songStringTest);
-		// while (*songTest != TERMINATOR) {
-		// 	print_binary(*songTest);
-		// 	songTest++;
-		// }
-		// print_binary(*songTest);
-		// printf("\n");
-
-		// PlaySong
-		// const char songStringTest[] = "B2A2G3R1B10R0A20G30";
-		// uint8_t* songTest = (uint8_t*)calloc(MAX_SONG_LENGTH, sizeof(uint8_t));
-		// StoreSong(songTest, songStringTest);
-		// PlaySong(songTest);
-
-		// PlayNote
-
 	}
 
 	return 0;
@@ -696,3 +648,52 @@ int MatchScore(const char countQueryString[], const char templates[]) {
 	}
 	return score;
 }
+
+
+// TEST functions
+// Display Menu
+// uint8_t choice = DisplayMenu(menuPlay);
+// List Songs
+// ListSongs(songTitles);
+// Pack/Unpack functions
+// uint8_t note = PackNote('E', (uint8_t) 0);
+// char test = UnpackNoteLetterASCII(note);
+// uint8_t test2 = UnpackNoteDuration(note);
+
+// Match Score (Choose song functionality)
+// int score = 0, topScore = 0, bestMatch = 0;
+// for (int i = 0; i < MAX_NUM_SONGS; i++) {
+// // printf("\n\n%i\n", i);
+// 	score = MatchScore(userInputBuffer, songTitles[i]);
+// 	if (score > topScore) {
+// 		topScore = score;
+// 		bestMatch = i;
+// 	}
+// }
+// // No matches found
+// if (topScore == 0) {
+// 	printf("No matches found\n");
+// }
+// else {
+// 	printf("Best Match:    %i.  %s\n", bestMatch+1, songTitles[bestMatch]);
+// 	printf("PlaySong()\n");
+// }
+
+// Store Song
+// const char songStringTest[] = "B2A2G3R1B10R0A20G30";
+// uint8_t* songTest = (uint8_t*)calloc(MAX_SONG_LENGTH, sizeof(uint8_t));
+// StoreSong(songTest, songStringTest);
+// while (*songTest != TERMINATOR) {
+// 	print_binary(*songTest);
+// 	songTest++;
+// }
+// print_binary(*songTest);
+// printf("\n");
+
+// PlaySong
+// const char songStringTest[] = "B2A2G3R1B10R0A20G30";
+// uint8_t* songTest = (uint8_t*)calloc(MAX_SONG_LENGTH, sizeof(uint8_t));
+// StoreSong(songTest, songStringTest);
+// PlaySong(songTest);
+
+// PlayNote
