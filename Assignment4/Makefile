@@ -1,6 +1,7 @@
 # cpp
 CC = cc
 C_FLAGS = -std=c99
+SRC = src
 INCLUDE = -I/include
 EXE = assignment4
 
@@ -33,8 +34,8 @@ EXE = assignment4
 
 all: ${EXE}
 
-${EXE}: main.c # extra source files
-	${CC} ${C_FLAGS} -o ${EXE} main.c #${INCLUDE} #extra source files before includes
+${EXE}: ${SRC}/main.c # extra source files
+	${CC} ${C_FLAGS} -o ${EXE} ${SRC}/main.c ${INCLUDE} #extra source files before includes
 
 clean:
 	-rm ${EXE}
