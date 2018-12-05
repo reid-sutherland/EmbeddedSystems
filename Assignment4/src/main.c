@@ -17,6 +17,8 @@ void TaskFunc_Check(void*);
 // Function Headers
 void PrintMenu();
 
+// Task Control Block
+
 // Struct pointers
 sensor_t* sensor_data;
 alarm_t* alarm_data;
@@ -25,7 +27,6 @@ check_t* check_data;
 
 // Global variables
 char readBuffer[MAX_BUFFER_LENGTH];		// user input buffer for serial
-task_t tasks[NUM_TASKS];		// Tasks array
 int currentTask = 1;		// which task is next
 
 
@@ -54,11 +55,10 @@ int main() {
 		read_data = (read_t*) calloc(1, sizeof(read_t));
 		check_data = (check_t*) calloc(1, sizeof(check_t));
 
+		// link sensor threshold to alarm threshold
 		sensor_data->threshold = calloc(1, sizeof(int));
 		alarm_data->threshold = sensor_data->threshold;
 
-		*sensor_data->threshold = 2;
-		printf("int: %d\n", *alarm_data->threshold);
 
 	}
 	exit(0);
