@@ -14,20 +14,19 @@ typedef struct task {
 
 // Structs for task functions
 typedef struct light_sensor {
+	int* armed;	// alarm is armed or not
 	int* threshold;
 	int sensorValue;
 	int threshFlag;		// 1 when threshold is broken, 0 otherwise
 } sensor_t;
 
-typedef struct alarm_state {
-	int halfPeriodMicroseconds;
-	int numIterations;		// number of iterations remaining of the current note
-	int note;		// current note
-} alarm_state_t;
-
 typedef struct alarm {
-	alarm_state_t prevState;	// previous state of alarm
+	int* armed;	// if the alarm is armed or not
 	int* threshold;		// threshold for the light sensor
+	// previous state of the alarm
+	int halfPeriodMicroseconds;
+	int numIterations;	// number of iterations remaining of the current note
+	int note;	// current note
 } alarm_t;
 
 typedef struct read_serial {

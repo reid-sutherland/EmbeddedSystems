@@ -18,6 +18,7 @@ void TaskFunc_Check(void*);
 void PrintMenu();
 
 // Task Control Block
+void (*TaskFuncs[NUM_TASKS])(void *);
 
 // Struct pointers
 sensor_t* sensor_data;
@@ -27,7 +28,7 @@ check_t* check_data;
 
 // Global variables
 char readBuffer[MAX_BUFFER_LENGTH];		// user input buffer for serial
-int currentTask = 1;		// which task is next
+int taskIter = 1;		// which task is next
 
 
 // Arduino variables
@@ -40,13 +41,13 @@ int main() {
 	{
 		// initialize task list
 		int i = 0;
-		tasks[i].TaskFunc = &TaskFunc_Sensor;
+		TaskFuncs[i] = &TaskFunc_Sensor;
 		i++;
-		tasks[i].TaskFunc = &TaskFunc_Alarm;
+		TaskFuncs[i] = &TaskFunc_Alarm;
 		i++;
-		tasks[i].TaskFunc = &TaskFunc_Read;
+		TaskFuncs[i] = &TaskFunc_Read;
 		i++;
-		tasks[i].TaskFunc = &TaskFunc_Check;
+		TaskFuncs[i] = &TaskFunc_Check;
 		i++;
 
 		// initialize struct pointers
@@ -55,41 +56,64 @@ int main() {
 		read_data = (read_t*) calloc(1, sizeof(read_t));
 		check_data = (check_t*) calloc(1, sizeof(check_t));
 
-		// link sensor threshold to alarm threshold
+		// Initialize sensor
+		sensor_data->armed = calloc(1, sizeof(int));
+		*sensor_data->armed = 0;	// initially unarmed
 		sensor_data->threshold = calloc(1, sizeof(int));
+		//TODO initialize Threshold
+		//TODO initialize sensor value
+		//TODO initialize thresh flag
+
+
+		// Initialize alarm
+		alarm_data->armed = sensor_data->armed;
 		alarm_data->threshold = sensor_data->threshold;
+		// TODO initialize alarm stuff
 
+		// Initialize read_serial
+		read_serial->bufferPtr = readBuffer;
+		read_serial->index = 0;
+		read_serial->newlineFlag = 0;
 
+		printMenu();
 	}
 	exit(0);
 
 	// loop
 	while (1)
 	{
-		switch (currentTask) {
+		switch (taskIter) {
+			case 0:
+				TaskFuncs[taskIter](sensor_data);
+				break;
+
 			case 1:
+				TaskFuncs[taskIter](alarm_data);
 				break;
 
 			case 2:
-
+				TaskFuncs[taskIter](read_data);
 				break;
 
 			case 3:
-
-				break;
-
-			case 4:
-
+				TaskFuncs[taskIter](check_data);
 				break;
 
 			default:
 				break;	// error, do nothing
 		}
 		// increment (or reset) task iterator
-		if (++currentTask > 4)
-			currentTask = 1;
+		if (++taskIter > 3)
+			taskIter = 0;
 	}
 
+	// free memory
+	free(sensor_data->threshold);
+	free(sensor_data->armed);
+	free(sensor_data);
+	free(alarm_data);
+	free(read_data);
+	free(check_data);
 
 	return 0;
 }
@@ -111,17 +135,20 @@ void PrintMenu() {
 // Task Functions
 // ****************
 void TaskFunc_Sensor(void * structPtr) {
+	sensor_t* sensor_s = (sensor_t*) structPtr;
 
+	// if not testing sensor or if system not armed, stop
+	if
 }
 
 void TaskFunc_Alarm(void * structPtr) {
-
+	alarm_t* alarm_s = (alarm_t*) structPtr;
 }
 
 void TaskFunc_Read(void * structPtr) {
-
+	read_t* read_s = (read_t*) structPtr;
 }
 
 void TaskFunc_Check(void * structPtr) {
-
+	check_t* check_s = (check_t*) structPtr;
 }
